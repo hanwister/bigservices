@@ -1,0 +1,152 @@
+[
+    {
+        "id": "account",
+        "schema": "protected",
+        "columns": [
+            {
+                "id": "name",
+                "type": "3"
+            },
+            {
+                "id": "type",
+                "type": "3"
+            },
+            {
+                "id": "status",
+                "type": "3"
+            }
+        ]
+    },
+    {
+        "id": "department",
+        "schema": "protected",
+        "columns": [
+            {
+                "id": "department_name",
+                "type": "3"
+            },
+            {
+                "id": "department_id",
+                "type": "3"
+            },
+            {
+                "id": "parent_id",
+                "type": "3"
+            },
+            {
+                "id": "appliedAt",
+                "type": "5"
+            },
+            {
+                "id": "department_user",
+                "type": "department_user",
+                "is_many": true,
+                "relations": [
+                    {
+                        "field": "department_id",
+                        "reference": "department_id"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "role",
+        "schema": "protected",
+        "columns": [
+            {
+                "id": "name",
+                "type": "name"
+            },
+            {
+                "id": "schema_id",
+                "type": "3"
+            },
+            {
+                "id": "table_id",
+                "type": "3"
+            },
+            {
+                "id": "record_id",
+                "type": "3"
+            },
+            {
+                "id": "create",
+                "name": "create",
+                "type": "4"
+            },
+            {
+                "id": "update",
+                "name": "update",
+                "type": "4"
+            },
+            {
+                "id": "delete",
+                "name": "delete",
+                "type": "4"
+            },
+            {
+                "id": "query",
+                "name": "query",
+                "type": "4"
+            }
+        ]
+    },
+    {
+        "id": "department_user",
+        "schema": "protected",
+        "columns": [
+            {
+                "id": "department_id",
+                "type": "3"
+            },
+            {
+                "id": "user_id",
+                "type": "3"
+            },
+            {
+                "id": "role_id",
+                "type": "3"
+            },
+            {
+                "id": "role",
+                "type": "role",
+                "relations": [
+                    {
+                        "field": "role_id",
+                        "reference": "id"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "id": "department_hierarchy",
+        "schema": "protected",
+        "columns": [
+            {
+                "id": "ancestor_id",
+                "type": "3"
+            },
+            {
+                "id": "descendant_id",
+                "type": "3"
+            },
+            {
+                "id": "depth",
+                "type": "1"
+            },
+            {
+                "id": "department_user",
+                "type": "department_user",
+                "is_many": true,
+                "relations": [
+                    {
+                        "field": "ancestor_id",
+                        "reference": "department_id"
+                    }
+                ]
+            }
+        ]
+    }
+]

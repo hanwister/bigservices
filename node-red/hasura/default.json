@@ -1,0 +1,194 @@
+{
+	"resource_version": 1148,
+	"metadata": {
+		"version": 3,
+		"sources": [
+			{
+				"name": "dudu-postgres",
+				"kind": "postgres",
+				"tables": [
+					{
+						"table": {
+							"name": "relation",
+							"schema": "private"
+						},
+						"array_relationships": [
+							{
+								"name": "list_column",
+								"using": {
+									"manual_configuration": {
+										"column_mapping": {
+											"column_id": "id"
+										},
+										"insertion_order": null,
+										"remote_table": {
+											"name": "column",
+											"schema": "private"
+										}
+									}
+								}
+							}
+						]
+					},
+					{
+						"table": {
+							"name": "table",
+							"schema": "private"
+						},
+						"array_relationships": [
+							{
+								"name": "list_column",
+								"using": {
+									"manual_configuration": {
+										"column_mapping": {
+											"id": "table_id"
+										},
+										"insertion_order": null,
+										"remote_table": {
+											"name": "column",
+											"schema": "private"
+										}
+									}
+								}
+							}
+						]
+					},
+					{
+						"table": {
+							"name": "column",
+							"schema": "private"
+						},
+						"array_relationships": [
+							{
+								"name": "list_relation",
+								"using": {
+									"manual_configuration": {
+										"column_mapping": {
+											"id": "column_id"
+										},
+										"insertion_order": null,
+										"remote_table": {
+											"name": "relation",
+											"schema": "private"
+										}
+									}
+								}
+							},
+							{
+								"name": "list_table",
+								"using": {
+									"manual_configuration": {
+										"column_mapping": {
+											"table_id": "id"
+										},
+										"insertion_order": null,
+										"remote_table": {
+											"name": "table",
+											"schema": "private"
+										}
+									}
+								}
+							}
+						]
+					},
+					{
+						"table": {
+							"name": "account",
+							"schema": "protected"
+						},
+						"array_relationships": []
+					},
+					{
+						"table": {
+							"name": "department",
+							"schema": "protected"
+						},
+						"array_relationships": [
+							{
+								"name": "list_department_user",
+								"using": {
+									"manual_configuration": {
+										"column_mapping": {
+											"department_id": "department_id"
+										},
+										"insertion_order": null,
+										"remote_table": {
+											"name": "department_user",
+											"schema": "protected"
+										}
+									}
+								}
+							}
+						]
+					},
+					{
+						"table": {
+							"name": "role",
+							"schema": "protected"
+						},
+						"array_relationships": []
+					},
+					{
+						"table": {
+							"name": "department_user",
+							"schema": "protected"
+						},
+						"array_relationships": [
+							{
+								"name": "list_role",
+								"using": {
+									"manual_configuration": {
+										"column_mapping": {
+											"role_id": "id"
+										},
+										"insertion_order": null,
+										"remote_table": {
+											"name": "role",
+											"schema": "protected"
+										}
+									}
+								}
+							}
+						]
+					},
+					{
+						"table": {
+							"name": "department_hierarchy",
+							"schema": "protected"
+						},
+						"array_relationships": [
+							{
+								"name": "list_department_user",
+								"using": {
+									"manual_configuration": {
+										"column_mapping": {
+											"ancestor_id": "department_id"
+										},
+										"insertion_order": null,
+										"remote_table": {
+											"name": "department_user",
+											"schema": "protected"
+										}
+									}
+								}
+							}
+						]
+					}
+				],
+				"configuration": {
+					"connection_info": {
+						"database_url": "postgresql://postgres:buuandbee@localhost:5432/postgres",
+						"isolation_level": "read-committed",
+						"pool_settings": {
+							"connection_lifetime": 600,
+							"idle_timeout": 180,
+							"max_connections": 50,
+							"retries": 1
+						},
+						"use_prepared_statements": false
+					}
+				}
+			}
+		]
+	}
+}

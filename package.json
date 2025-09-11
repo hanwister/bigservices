@@ -1,0 +1,30 @@
+{
+  "name": "bigservices",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/hanwister/bigservices#readme",
+  "bugs": {
+    "url": "https://github.com/hanwister/bigservices/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hanwister/bigservices.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "binance": "^3.0.7",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "http-proxy-middleware": "^3.0.5",
+    "monaco-editor": "^0.52.2",
+    "node-binance-api": "^1.0.12",
+    "vite": "^7.1.3"
+  }
+}

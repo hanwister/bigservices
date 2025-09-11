@@ -1,0 +1,157 @@
+[
+    {
+        "id": "relation",
+        "columns": [
+            {
+                "id": "field",
+                "type": "3",
+                "required": true
+            },
+            {
+                "id": "reference",
+                "type": "3",
+                "required": true
+            },
+            {
+                "id": "column_id",
+                "type": "3",
+                "required": true
+            },
+            {
+                "id": "column",
+                "type": "column",
+                "relations": [
+                    {
+                        "field": "column_id",
+                        "reference": "id"
+                    }
+                ]
+            }
+        ],
+        "schema": "private"
+    },
+    {
+        "id": "table",
+        "columns": [
+            {
+                "id": "name",
+                "name": "name",
+                "type": "3"
+            },
+            {
+                "id": "schema",
+                "name": "schema",
+                "type": "3",
+                "required": false
+            },
+            {
+                "id": "getter",
+                "name": "getter",
+                "type": "3"
+            },
+            {
+                "id": "setter",
+                "name": "setter",
+                "type": "3"
+            },
+            {
+                "id": "format",
+                "name": "format",
+                "type": "3"
+            },
+            {
+                "id": "column",
+                "name": "column",
+                "type": "column",
+                "is_many": true,
+                "relations": [
+                    {
+                        "field": "id",
+                        "reference": "table_id"
+                    }
+                ]
+            }
+        ],
+        "schema": "private"
+    },
+    {
+        "id": "column",
+        "columns": [
+            {
+                "id": "name",
+                "name": "name",
+                "type": "3",
+                "dname": "Name"
+            },
+            {
+                "id": "dname",
+                "name": "dname",
+                "type": "3",
+                "dname": "Display Name"
+            },
+            {
+                "id": "type",
+                "name": "type",
+                "type": "3",
+                "required": true,
+                "no_modify": false,
+                "dname": "Type"
+            },
+            {
+                "id": "required",
+                "name": "required",
+                "type": "4",
+                "dname": "Required"
+            },
+            {
+                "id": "is_many",
+                "name": "is_many",
+                "type": "4",
+                "dname": "Is Many"
+            },
+            {
+                "id": "no_modify",
+                "name": "no_modify",
+                "type": "4",
+                "dname": "No Modify"
+            },
+            {
+                "id": "format",
+                "name": "format",
+                "type": "3",
+                "dname": "Format"
+            },
+            {
+                "id": "table_id",
+                "name": "table_id",
+                "type": "3",
+                "required": true,
+                "dname": "Table ID"
+            },
+            {
+                "id": "relation",
+                "name": "relation",
+                "type": "relation",
+                "is_many": true,
+                "relations": [
+                    {
+                        "field": "id",
+                        "reference": "column_id"
+                    }
+                ]
+            },
+            {
+                "id": "table",
+                "name": "table",
+                "type": "table",
+                "relations": [
+                    {
+                        "field": "table_id",
+                        "reference": "id"
+                    }
+                ]
+            }
+        ],
+        "schema": "private"
+    }
+]
