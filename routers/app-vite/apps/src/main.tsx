@@ -13,7 +13,10 @@ import {
 let loaderLocal = function (loader) {
   return loader
 }
-console.log(import.meta.env)
+
+window.env = import.meta.env;
+
+console.log("env", JSON.stringify(window.env))
 function Module(props) {
   const [display, setDisplay] = React.useState(false);
   const [module_id, setModuleId] = React.useState(null);

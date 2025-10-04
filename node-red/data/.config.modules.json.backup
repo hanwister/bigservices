@@ -124,5 +124,12 @@
         "subpath": "",
         "builtin": false,
         "known": false
+    },
+    "bull": {
+        "spec": "bull",
+        "module": "bull",
+        "subpath": "",
+        "builtin": false,
+        "known": false
     }
 }

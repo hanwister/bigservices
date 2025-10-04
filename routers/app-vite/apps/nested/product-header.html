@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Product Header</title>
+    <style>
+        .product-header {
+            display: flex;
+            align-items: center;
+            padding: 24px 16px;
+            border-bottom: 1px solid #eee;
+            background: #fff;
+        }
+        .product-gallery {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-right: 24px;
+        }
+        .product-media {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            border-radius: 8px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+        }
+        .product-info {
+            flex: 1;
+        }
+        .product-title {
+            font-size: 2rem;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+        }
+        .product-price {
+            font-size: 1.5rem;
+            color: #e53935;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        .product-rating {
+            color: #ffb400;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+        .product-meta {
+            color: #888;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="product-header">
+        <div class="product-gallery">
+            <!-- First item is a video -->
+            <video class="product-media" controls poster="https://via.placeholder.com/120?text=Video">
+                <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <!-- Gallery images -->
+            <img class="product-media" src="https://via.placeholder.com/120?text=Image+1" alt="Product Image 1">
+            <img class="product-media" src="https://via.placeholder.com/120?text=Image+2" alt="Product Image 2">
+        </div>
+        <div class="product-info">
+            <h1 class="product-title">Sample Product Name</h1>
+            <div class="product-price">$49.99</div>
+            <div class="product-rating">★★★★☆ (120 reviews)</div>
+            <div class="product-meta">In Stock &middot; Free Shipping</div>
+        </div>
+    </header>
+</body>
+</html>

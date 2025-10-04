@@ -25,7 +25,15 @@ class graphQlClient {
 
   async connect(url, useSocket: boolean = true) {
     this.emitter.setMaxListeners(0);
-    this.socket = io( url || import.meta.env.VITE_GRAPHQL_URL_APP, {
+    const fullUrlRegex = /^(http|ws)s?:\/\/((?:[a-zA-Z0-9\-_.~%]+|\[[a-fA-F0-9:.]+\])|(?:\d{1,3}\.){3}\d{1,3})(?::\d+)?(?:[-a-zA-Z0-9()@:%_+\.~#?&//=]*)$/;
+    if (url && !fullUrlRegex.test(url)) {
+      url = `${env.VITE_GRAPHQL_URL}/${url}`
+      if (!fullUrlRegex.test(import.meta.env.VITE_GRAPHQL_URL_APP)) {
+        throw new Error("Invalid URL format in environment variable. Please provide a full URL including the protocol (http:// or https://): " + url);
+      }
+    }
+    this.http_url = url;
+    this.socket = io( url, {
       transports: this.transports,
       reconnectionDelay: 1000,
       reconnection: true
@@ -38,7 +46,9 @@ class graphQlClient {
       this.socket.emit('data', {
         type: "connection_init",
         payload: {
-          headers: this.headers
+          headers: Object.assign({}, this.headers),
+          // headers: Object.assign({ "Authorization": `Bearer ${document.cookie.get("token")}` }, this.headers),
+
         }
       })
     });

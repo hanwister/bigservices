@@ -2,6 +2,7 @@ import { createElement, Component, PureComponent, createRef, forwardRef, Childre
 import * as on from "events";
 console.log(on)
 import EventEmitter from "events";
+import { createId } from "@paralleldrive/cuid2";
 import * as rfc from "rfc6902";
 import Dudu, { Build_DuDu } from "./assets/dudu";
 import axios from "axios";
@@ -17,17 +18,19 @@ import ELK from "elkjs";
 import store from "store";
 import observerStore from "store/plugins/observe";
 import * as lodash from "lodash";
-import * as  anime from "animejs";
+import { animate } from "animejs";
 import 'handsontable/dist/handsontable.full.min.css';
 import { registerAllModules } from 'handsontable/registry';
 import * as handsontableReact from "@handsontable/react";
+import { HyperFormula } from "hyperformula";
 import Sortable from "sortablejs";
 import ImgCrop from 'antd-img-crop';
-// import * as cssGui from '@compai/css-gui';
+import * as cssGui from '@compai/css-gui';
 registerAllModules();
 
 // const _ = lodash();
 // console.log("___-", _);
+window.crypto.randomUUID = createId;
 store.addPlugin(observerStore)
 const AsyncFunction = (async function(){}).constructor;
 let __emitter = new EventEmitter();
@@ -38,7 +41,6 @@ window.slotsMap = slotsMap;
 let streamContainers = new Map();
 let globalContainer = {};
 let localContainer = {};
-let createId = () => window.crypto.randomUUID()
 let init = Date.now();
 let Loading = antd.Spin;
 
@@ -87,6 +89,7 @@ let getElement = async ({module_id, element_id, alias = null}) => {
         })
         if (!loading.has(module_id)) {
           loading.add(module_id);
+          console.log("Load module", module_id, Date.now() - init, import.meta.env);
           let res = await axios({
                       method: "post",
                       url: import.meta.env.VITE_GRAPHQL_URL_APP,
@@ -134,7 +137,7 @@ let getKey = ( data, loopKey = [] ) => {
   return keyFinal
 }
 
-let newKey = () => window.crypto.randomUUID();
+let newKey = () => createId();
 
 let DragDropContainer = {
   dragParentSortable: null,
@@ -227,7 +230,7 @@ class SimpleElement extends PureComponent {
       loopKey: null,
       display: true,
       that: createRef(null),
-      key: window.crypto.randomUUID()
+      key: createId()
     };
     this.stateProxy = new Proxy({}, {
       set: async (target, prop, value) => {
@@ -300,7 +303,7 @@ class SimpleElement extends PureComponent {
       return await new AsyncFunction(defind + (config.mode === "full" ? `return await (${func_string})()` : `${func_string}`)).bind(this.stateProxy, event, this.props.__global, this.props.__local, this.__stream, {
         monaco: Editor,
         _: lodash,
-        anime,
+        anime: animate,
         antd,
         antdpro,
         antdicons,
@@ -308,8 +311,9 @@ class SimpleElement extends PureComponent {
         ImgCrop,
         rfc,
         ELK,
-        // cssGui,
+        cssGui,
         "@handsontable/react": handsontableReact,
+        HyperFormula,
         r: React,
         f: async (child_func_string, child_event = null, child_config = {}) => {
           return await this.attachEvent(child_func_string, child_event, child_config)
@@ -396,7 +400,7 @@ class SimpleElement extends PureComponent {
 
   async fetchChildren() {
     if (this.props.element[0] == "__module") {
-      let module_alias = window.crypto.randomUUID();
+      let module_alias = createId();
       let slots = await Promise.all((this.props.element[4] || []).map( async x => {
         let slot = (await getElement({ module_id: this.props.__target.module_id, element_id: x}));
           return [ this.props.__target.module_id, x, (slot[2] && slot[2].slot) ? slot[2].slot : "default", slot]
@@ -485,7 +489,7 @@ class SimpleElement extends PureComponent {
    }
   UNSAFE_componentWillUpdate() {  this.runFilterEvents("beforeupdate")}
   componentDidUpdate() { this.runFilterEvents("afterupdate") }
-  componentShou
+  // componentShou
 
   render() {
     
@@ -535,11 +539,11 @@ class SimpleElement extends PureComponent {
           default:
             if ( typeof(this.state.tag) !== "string" && [ ...(this.props.element[4] || [])].length === 0) {
               return (
-                <this.state.tag key={this.state.key || window.crypto.randomUUID()} key-id={this.props.__target.element_id} {... (typeof(this.state.tag) != "string" ? this.state.attributes : {})} >
+                <this.state.tag key={this.state.key || createId()} key-id={this.props.__target.element_id} {... (typeof(this.state.tag) != "string" ? this.state.attributes : {})} >
               </this.state.tag>)
             } else if ( typeof(this.state.tag) === "string" ) {
               return <Fragment>
-                <this.state.tag ref={this.state.that} key={this.state.key || window.crypto.randomUUID()} key-id={this.props.__target.element_id} {... (typeof(this.state.tag) != "string" ? this.state.attributes : {})} >
+                <this.state.tag ref={this.state.that} key={this.state.key || createId()} key-id={this.props.__target.element_id} {... (typeof(this.state.tag) != "string" ? this.state.attributes : {})} >
                   {this.state.content}
                   {[this.state.children.map( ([el, target, alias], _childIndex) => (
                       <SimpleElement element_id={target?.element_id || alias} __target={target || el} element={el} __stream={Object.assign({}, this.state.stream, { _childIndex })} key={ alias || _childIndex} {...{ __global: this.props.__global, __local: this.props.__local}}></SimpleElement>
@@ -576,7 +580,7 @@ class AppComponent extends Component {
     this.state = {
       __global: new Proxy({
         __createLocalObject: () => { 
-          console.log("Creating Local Object", this.state.module_id ,this.props)
+          console.log("Creating Local Object", this.state.module_id ,this.props, this.state)
           let __local = new Proxy({
           __emitter: new EventEmitter(),
           __emitterContainer: {  },
@@ -707,7 +711,7 @@ class AppComponent extends Component {
       children: [["root", ["div", null, null, "Loading"]]],
       stream: {},
       time: new Date(),
-      key: window.crypto.randomUUID(),
+      key: createId(),
       __updatedAt: null
     }
   }

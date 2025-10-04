@@ -1,0 +1,677 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+  output          = "./prisma/default"
+  binaryTargets   = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://postgres:buuandbee@db1.tolife.me:5432/postgres"
+  schemas  = ["private", "protected", "library", "app", "style", "auth", "cloud", "Runner Server", "dev", "bucket"]
+}
+
+model relation {
+  id        String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+  deletedAt DateTime?
+  field     String?
+  reference String?
+  column_id String?
+
+  @@map("relation")
+  @@schema("private")
+}
+
+model table {
+  id        String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+  deletedAt DateTime?
+  name      String?
+  schema    String?
+  getter    String?
+  setter    String?
+  format    String?
+
+  @@map("table")
+  @@schema("private")
+}
+
+model column {
+  id        String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+  deletedAt DateTime?
+  name      String?
+  dname     String?
+  type      String?
+  required  Boolean?
+  is_many   Boolean?
+  no_modify Boolean?
+  format    String?
+  table_id  String?
+
+  @@map("column")
+  @@schema("private")
+}
+
+model account {
+  id        String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+  deletedAt DateTime?
+  name      String?
+  type      String?
+  status    String?
+
+  @@map("account")
+  @@schema("protected")
+}
+
+model department {
+  id              String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime? @updatedAt
+  deletedAt       DateTime?
+  department_name String?
+  department_id   String?
+  parent_id       String?
+  appliedAt       DateTime?
+
+  @@map("department")
+  @@schema("protected")
+}
+
+model role {
+  id        String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+  deletedAt DateTime?
+  schema_id String?
+  table_id  String?
+  record_id String?
+  create    Boolean?
+  update    Boolean?
+  delete    Boolean?
+  query     Boolean?
+
+  @@map("role")
+  @@schema("protected")
+}
+
+model department_user {
+  id            String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime? @updatedAt
+  deletedAt     DateTime?
+  department_id String?
+  user_id       String?
+  role_id       String?
+
+  @@map("department_user")
+  @@schema("protected")
+}
+
+model department_hierarchy {
+  id            String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime? @updatedAt
+  deletedAt     DateTime?
+  ancestor_id   String?
+  descendant_id String?
+  depth         Int?
+
+  @@map("department_hierarchy")
+  @@schema("protected")
+}
+
+model cli7nzxn50001try731u85x5u {
+  id                        String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime? @updatedAt
+  deletedAt                 DateTime?
+  cli7qpheg0002trundv17mdor String?
+  cli7r6zqu0002truvr796bo9n String?
+
+  @@map("cli7nzxn50001try731u85x5u")
+  @@schema("library")
+}
+
+model gwtuz6s83hc28tbjjmhh7l84 {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  ydztlhpp9zminehxf33789re String?
+  xu5jbkxfy66v03otm623ooqx String?
+
+  @@map("gwtuz6s83hc28tbjjmhh7l84")
+  @@schema("app")
+}
+
+model x5libi5961z390umzdz7ocpr {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  h752qia5z79v4wivtr5pd5h0 String?
+  m2seozb85ojgyzocfwim3dcr String?
+  uxs39ded35jid063gnd3vnzk String?
+  nac18x8kaoi9k2pns1t3wleq String?
+  a00mmio8j8maonjxne8otaqd String?
+  ipracf31c6t3z6yq8t4oevkm String?
+
+  @@map("x5libi5961z390umzdz7ocpr")
+  @@schema("style")
+}
+
+model nnuncdvj7t8438s77g09ek7b {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  lpgy1q5wrmkm21q6km6ihstk String?
+  poadtfpreazub81131x2gg1q String?
+  r0f3um8z3rybtsyfkog9j3if String?
+
+  @@map("nnuncdvj7t8438s77g09ek7b")
+  @@schema("app")
+}
+
+model bln6p3evjcypeyb2m53mndfp {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  zyfxnb3gqv3xq4x6himc7ipv String[]
+  iletbnxksjf0769azoq3b8t2 String?
+  m2t4xa3m2xc8jfvm16biggu1 String?
+  vi9wukxcw4o58yh4yori4dwq String[]
+  byy1wujeba2iy2uqvssxh8z7 Json?
+
+  @@map("bln6p3evjcypeyb2m53mndfp")
+  @@schema("style")
+}
+
+model kz6swubuzek0oxv0snig01yf {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  xu9ht06nuam6tm5f0euj58a4 String?
+  u7gwpwvvdqv7nrzztthicllk Json?
+  eytx4ks7lejsq74vw3intbno String?
+  mnorztesgay849v593lkk1w3 String?
+
+  @@map("kz6swubuzek0oxv0snig01yf")
+  @@schema("app")
+}
+
+model g7ant015g4oh96i9rwqkqyux {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  pbdc6mnqcxcuu3ecuwufdpak String?
+  d4e3dkwg17hrhq7i0vlqwvs3 String?
+  hzxjczuwqomep2zuzo9ye2bu String?
+  ayq09v8bzyxc725cdcat1tqu Boolean?
+
+  @@map("g7ant015g4oh96i9rwqkqyux")
+  @@schema("app")
+}
+
+model vx8mt7bycygryzfth7x3v0br {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  qcor8bizwqvq6kdxm2lgekb4 String?
+  chkzjm6tc48wjtftajm1ohs4 String?
+
+  @@map("vx8mt7bycygryzfth7x3v0br")
+  @@schema("app")
+}
+
+model aobcevtk024vownl3ekhmg6u {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  ya0ycf5bq8vskjjw6yangiix String?
+  bd1bdji6ozaaj6qkg8dxq042 String?
+  kycp2g09n2qp6k4mxxnzlj3k Json?
+  wg4gxe7uopu40ik2877on7l5 String[]
+
+  @@map("aobcevtk024vownl3ekhmg6u")
+  @@schema("app")
+}
+
+model nv3gqx2omz0vf15ddez95htw {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  nmvcu5bgjc00s2pvd6o21b0n String?
+  f7ei27vvs0h10o3pt6531cto String?
+  d9gr72534wjim3i4w1gq4ifi String?
+
+  @@map("nv3gqx2omz0vf15ddez95htw")
+  @@schema("app")
+}
+
+model ac7sv59n3c790t81s0athzia {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  n28win84hoqke8k9frx438c2 String?
+  x378jctzhjavzqd0uju1p5v2 String?
+
+  @@map("ac7sv59n3c790t81s0athzia")
+  @@schema("auth")
+}
+
+model me0d1kd9yi2ep4bmypgd1y5x {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  u6wtw34wrk6kuu3fqp8mubzz DateTime?
+  s37f7wn77laftngbudhd8v49 Float?
+  umu0zz56069zfs7ardqjpk80 DateTime?
+  u723ht8t71ghhp9t5t7x63wv DateTime?
+  tfsajqgbqkvkbv5ezfeof27r String?
+  rpokihxytxzymjl0m0y1gzie String?
+  hmgo9ervgfgwb5gdrc3auirv String?
+
+  @@map("me0d1kd9yi2ep4bmypgd1y5x")
+  @@schema("app")
+}
+
+model cznfzscsdz6ez5l0lruc7kem {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  l8d2l9ja0gy4yi5v7zhx5kt1 String?
+  lu3e9aozecmclfdm0f3gwzj1 String?
+
+  @@map("cznfzscsdz6ez5l0lruc7kem")
+  @@schema("cloud")
+}
+
+model ptn6m2rmto4tmehbxglf1va3 {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  y8kxsk8s3sqsuz0nowjus39u String?
+  gia3zm5rs3awzoa90yrdnkif Json?
+  e49qtel8b9byhl1w1s2l0g0z Json?
+
+  @@map("ptn6m2rmto4tmehbxglf1va3")
+  @@schema("auth")
+}
+
+model gfksgqxqqf5v1r9xwnx2mx0t {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  q64tjxo7nohe6brq3tgx3bfd String?
+  osace15ex5n29pq8b72ym3yt String?
+
+  @@map("gfksgqxqqf5v1r9xwnx2mx0t")
+  @@schema("app")
+}
+
+model hsh6fxag5luidi05btj8h55d {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  zdavbjmix53yeup815ypyrna Float?
+  g94zdbb6qz915n8lj1sr6o3c Float?
+  gqx8f9o83kwdwdn5uxcjpph4 String?
+  emj2z5garv6j5w6yv5wf3k1h String?
+  wysww1q7kda9vvfsua8vbvxv Float?
+  grz0kmjy75t0g8miwmyv52iu Float?
+  psudm0lywa7iygdoqwztuodn String?
+
+  @@map("hsh6fxag5luidi05btj8h55d")
+  @@schema("app")
+}
+
+model io6jvssmkzy4ctqgds0jx6rb {
+  id        String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+  deletedAt DateTime?
+
+  @@map("io6jvssmkzy4ctqgds0jx6rb")
+  @@schema("app")
+}
+
+model yciavf2we1zwb86zv0ibigxj {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  kbp0muo1c5edgudrp2jynxcj String?
+  o9ai7f25cfnfh6fodebxmdrp String?
+
+  @@map("yciavf2we1zwb86zv0ibigxj")
+  @@schema("cloud")
+}
+
+model q4b5b1ml4mu5k5sqqlv9yf3i {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  ee4w516o9eiyarnjyu3vjoz1 String?
+  p5gpi36up9avu16hx2lu39ng Json?
+  oyv1k1dshgoufth9u3ynrspo String?
+  sxwkie0qjrpax78ojfaxj8p1 String[]
+  bhp0efy5br22lmmz37n2c31r String?
+  n3mry7hrqzcr0ecq2pj9m2vd String?
+  xc3tnri3tz0q003pyf80p2md String?
+
+  @@map("q4b5b1ml4mu5k5sqqlv9yf3i")
+  @@schema("app")
+}
+
+model wktoglimpbnciem4cswrfw35 {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  gkrqxovh1hjhk6quhlz7q8jf String?
+  bbz4c0pdw67yeup8kd82izoy String?
+  vyiwljxchjd7h228b8mj393h String?
+  m74pxuo0nxcna8aulwz0kt9b String?
+  ul7qo5b14uvowk5c952cufp2 String?
+
+  @@map("wktoglimpbnciem4cswrfw35")
+  @@schema("app")
+}
+
+model a76cv0dncgf6oc7l4mipi6ns {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  xm2e4m0wl9x62mz7wmlfxg7a String?
+  oxwoxkreqm4nic45x7uyi8i1 String?
+  qpxc269rv4s68tomtw8pyt6e String?
+  lroovvobdu6i88h4fl1i9ia1 DateTime?
+
+  @@map("a76cv0dncgf6oc7l4mipi6ns")
+  @@schema("app")
+}
+
+model amki954n0e6d7rwvde63kksu {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  g810q6xg3oayu45r7qppg7qa String?
+  cbzqi5sng7qu2l5h6ybs8aqh String?
+  nultt52ehlf9hsjj5mtzn26h String?
+
+  @@map("amki954n0e6d7rwvde63kksu")
+  @@schema("cloud")
+}
+
+model zm0c2dpryown4lva5dpq3wgh {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  z6erxzibenjbyjckdnxygxjv String?
+  zyo63lnqrr7do4tqtol1pcnd String?
+
+  @@map("zm0c2dpryown4lva5dpq3wgh")
+  @@schema("app")
+}
+
+model xenqo5s13d9le0c8ul32g1fg {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  bg05wjbup076h81s9eh2qqlz String?
+  xgpx1tx93vkea274annydmlz String?
+  n90n24j4h3wq9cacr0r59er7 String?
+  birzg7dtpadbikb06pk019qr DateTime?
+
+  @@map("xenqo5s13d9le0c8ul32g1fg")
+  @@schema("cloud")
+}
+
+model ewagu4lwxw59flqwd9sykf9p {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  jizcb4bcieibj64uk2u5veig String?
+
+  @@map("ewagu4lwxw59flqwd9sykf9p")
+  @@schema("app")
+}
+
+model eesxek0qe7o775m73eahprpp {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  bnjacnov5nojq99s9qfx26h7 String?
+  aj3or676gk43mr8fw5x236wx String?
+
+  @@map("eesxek0qe7o775m73eahprpp")
+  @@schema("app")
+}
+
+model db9sdb8k0loafy8qqy4jed77 {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  nzm3fezewwxi683tsvbmeu39 String?
+  txchcsaky3kwh9mw68cazp3v String?
+  w218d1bpmw4wd8ala3bsq55y String?
+  yi822nddu9mjblibm05jql2x String?
+  yz9330be0reo3igcsrcuqzei String?
+  n0q5y3la9v0sraqotc2mm23c String?
+  rz4iu19cmv4ri0m3kfcrtn6q Float?
+
+  @@map("db9sdb8k0loafy8qqy4jed77")
+  @@schema("library")
+}
+
+model clibkgqe60001tr2ef6bmewkn {
+  id                        String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime? @updatedAt
+  deletedAt                 DateTime?
+  clibkifsu0005tr2erfs4i2t4 String?
+  cliewwj1e0002trh7ymyo2n4t String?
+  cliez27jr0003trd31dylvg3g String?
+  cliewwzlm0005trh7cic2yjgt String?
+  wqme8voptaetkawfkgwa72ww  Json?
+  pqr6xwnvyerwvmmz2wqmrldn  String?
+
+  @@map("clibkgqe60001tr2ef6bmewkn")
+  @@schema("app")
+}
+
+model ohzmtf86gfkn0t47lyqyozmv {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  jgbdcp3jvldacbvoxraqt81c String?
+  j6jsv33r23huf2bz5ie0pae9 String?
+  eu1r1wmdf45gnm7lgwp6g459 String[]
+  he9z5c6lvhfnaszptq0gdye6 String?
+  tl711e93i2dw9fudect1nl6p String?
+  sn6sr8jxdjyfn7thm2695v01 String[]
+
+  @@map("ohzmtf86gfkn0t47lyqyozmv")
+  @@schema("library")
+}
+
+model egwyrwihsmtwir2fcin633r6 {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  c65zap8fhkcg2gt39p8f7vbd String[]
+  oj8syp8p47eoa7bmmvqa5mw4 Json?
+  wf5g977k56l9k69jb1rtzj1b String?
+  tskt6f5q8jisnj5clrmu3duc String?
+
+  @@map("egwyrwihsmtwir2fcin633r6")
+  @@schema("app")
+}
+
+model gqvs9kezaiyx5oejtfkau5bq {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  czwnepwqle0kqvabgbi7ixpb String?
+
+  @@map("gqvs9kezaiyx5oejtfkau5bq")
+  @@schema("app")
+}
+
+model eswjvms0hbrde33rbmhb1fle {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  wczb97zyw79ts16yq36dbg03 String?
+  o0tt0e3c3ujce3y5x32pp65x String?
+  oqvqmzq3hhtzkagshgo65jux String?
+  q6wumgbsokm7y6qwktr8e3qa String?
+  onz1o52gcqwp8mfs5hyacn7w String[]
+
+  @@map("eswjvms0hbrde33rbmhb1fle")
+  @@schema("app")
+}
+
+model nfc7w2xhj1yqmosr63wawkj1 {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  dgmsgu2iugbaoiuu4uybkr8t String?
+  fvhpqxpa1co70qx84bh5lfus String?
+  ii84642a60hihr2xcujkbc4s Int?
+  ovxu2wh4txg3of2nuenigd4c String?
+  a3cucn95wxqxvg0r2mge70ay String?
+  btaral3r3stdaaf8hqezv189 Int?
+  oc1jblzn43ce044xjijoj5ka String?
+
+  @@map("nfc7w2xhj1yqmosr63wawkj1")
+  @@schema("app")
+}
+
+model g6jrw4mzxkrhuuyciktl9o8k {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  hos78jpdesjmt4yrcdp6h2qc String?
+  tjkynxsn0nr2cf01uzb3dyje String?
+  i549643ou4erlp38ofom9sf0 String?
+  anktd5odz3zuhca40zczolqh Json?
+
+  @@map("g6jrw4mzxkrhuuyciktl9o8k")
+  @@schema("cloud")
+}
+
+model eqiphlh882vv3535i601qwmc {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  k67tzbdmosa6csi103c57sic String?
+  wjr96qmrxn7psi46izgffh28 String?
+  wi75pfslep5b0cdf0qojeo3v DateTime?
+  zrptw5p71745fi9baut7sk9q String?
+
+  @@map("eqiphlh882vv3535i601qwmc")
+  @@schema("cloud")
+}
+
+model fpd7yxtpvwtvhw4clp80hyxi {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  vv6jdgctqcdsc7qdpvve50ts Json?
+
+  @@map("fpd7yxtpvwtvhw4clp80hyxi")
+  @@schema("Runner Server")
+}
+
+model jpd8d8jx72vrp6ok01p0zb1b {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  gul17x5s3duy9ob6ccee431b String?
+  isbtulqtopz9udi31ibgqfae String?
+  kh5b4fahhtw0xzz2guu8d1f4 Boolean?
+  x8ytodax2lqda46dvk2uai3r Boolean?
+
+  @@map("jpd8d8jx72vrp6ok01p0zb1b")
+  @@schema("auth")
+}
+
+model dnuimb8nqzt42mnyrtgxgrt2 {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  jgwh43f13294i8pvkftj0gdw Json?
+  uv33wphiqhfsrgdxtst50zrp Json?
+  gwd8kjx0dm5wv6w9j56kj751 String?
+  givn51jw1h73xzgoiichbu10 Json?
+
+  @@map("dnuimb8nqzt42mnyrtgxgrt2")
+  @@schema("cloud")
+}
+
+model x5n5xcbdlbhhrr3nzae6wv25 {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  vvs0lj5t3btpn7ck9qg4l0hb String?
+  oovm8g198vtxh484f9qylmhr Float?
+
+  @@map("x5n5xcbdlbhhrr3nzae6wv25")
+  @@schema("dev")
+}
+
+model ltxwzfndejsmc0cg772e50ul {
+  id                       String    @id @default(dbgenerated("gen_random_uuid()"))
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime? @updatedAt
+  deletedAt                DateTime?
+  hiul67tn6y90oi6xqmsrotv6 String?
+  lihziugnpu2h85xyrim55vwi String?
+  gbclehqtfjjzaar9shrgi913 String?
+  fdc2shwlo4r4vzze2eee7sqh String?
+  llvlflytf6zingnhppy8n5j4 String?
+  zkx2e9c1rk6lwm0fhd516shb Float?
+
+  @@map("ltxwzfndejsmc0cg772e50ul")
+  @@schema("bucket")
+}
