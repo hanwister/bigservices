@@ -1,0 +1,264 @@
+<% let { hostname, path } = __req;
+let product = null;
+let checkoutstate = {};
+let gtmId = "GTM-M7ZHMB3R";
+let gtagId = ["G-BE837RQ9L3"];
+let awList = [];
+if ( hostname.endsWith('nhacolan.com')) {
+    gtmId = "GTM-M7ZHMB3R";
+    gtagId = ["G-HW8JEHFWSB", "AW-829751891", "AW-10903557727"];
+    awList.push("AW-829751891/MJNyCJjY-LEDENOE1IsD");
+    awList.push("AW-10903557727/sPYzCNykkvQZEN-snM8o") 
+} else if ( hostname.endsWith('shopcolan.com')) {
+    gtmId = "GTM-M7ZHMB3R";
+    gtagId = ["AW-11438549195"];
+    awList.push("AW-11438549195/xJx8CK-Pj5QZEMvRqc4q")
+} else if ( hostname.endsWith('cokhi24h.shop')) {
+    gtagId = ["G-HW8JEHFWSB", "AW-16583235448", "AW-16811698874", "AW-16814682588", "G-XN1JVBEEFR", "AW-16814683527"];
+    awList.push("AW-16583235448/Ngz8CKi_pfMZEPiuwOM9");
+    awList.push("AW-16811698874/sFIoCOXy2PQZELrVuNA-");
+    awList.push("AW-16814682588/89kSCMCI0_UZENzj7tE-");
+    awList.push("AW-16814683527/FLE9CJnFgvYZEIfr7tE-");
+} else if ( hostname.endsWith('cokhicolan.com')) {
+    gtmId = "GTM-KWPXB3NL";
+    gtagId = ["G-T1GTTGB3TE", "AW-10882295584", "G-HW8JEHFWSB", "AW-829751891"];
+    awList.push("AW-10882295584/Uz12CKjInbgDEKDOisUo")
+} else if ( hostname.endsWith('boshun.shop')) {
+    gtagId = ["G-E9M0EWMCLJ","AW-16467235353"];
+    awList.push("AW-16467235353/ayWECPrBtZQZEJmkmKw9")
+} else if ( hostname.endsWith('cokhi24h.store')) {
+    gtagId = ["G-HW8JEHFWSB","AW-16816140831"];
+    awList.push("AW-16816140831/v9rrCLunrvYZEJ_kx9I-")
+};
+
+let google_site_verification = "";
+if ( __req.hostname.endsWith("cokhi24h.shop")) {
+	google_site_verification = "yvhRvRRuaPiyWVJUBz6ab2Bpf8_IK6CHmmLd4o7rbkk";
+} else if ( __req.hostname.endsWith("shopcolan.com")) {
+    google_site_verification = "ttzjPKO2egqaiyZPFoW27QoAty12N0UvPZzTzsrel8E";
+} else if ( __req.hostname.endsWith("nhacolan.com")) {
+    google_site_verification = "Xj4gl0J7JtqbxBxPjOCov_GaurtdoLZNRDX_iRopTKk";
+} else if ( __req.hostname.endsWith("cokhicolan.com")) {
+  google_site_verification = "XVmGfURUGI3AA4w-C5LfhTC-yHnWdJYdFQ9fRh7_yns";
+} else if ( __req.hostname.endsWith("www.dienmaycolan.com")) {
+  google_site_verification = "SeCWfaHyZng3KI8jZHphrhau2vVHVubwAOQ7cgNP12U";
+}
+
+let mainGtagId = gtagId[0];
+
+    let res = await axios({
+        method: "post",
+        url: process.env.GRAPHQL_URL + "/app",
+        data: JSON.stringify({ query: `query List_q4b5b1ml4mu5k5sqqlv9yf3i($where: Modelq4b5b1ml4mu5k5sqqlv9yf3iWhereInput) {
+    landing:list_q4b5b1ml4mu5k5sqqlv9yf3i(where: $where) {
+        products:list_eswjvms0hbrde33rbmhb1fle {
+        id
+        thumbnail:oqvqmzq3hhtzkagshgo65jux
+        sku:o0tt0e3c3ujce3y5x32pp65x
+        name:wczb97zyw79ts16yq36dbg03
+        variants:list_nfc7w2xhj1yqmosr63wawkj1 {
+            id
+            thumbnail:dgmsgu2iugbaoiuu4uybkr8t
+            list_price:ii84642a60hihr2xcujkbc4s
+            name:ovxu2wh4txg3of2nuenigd4c
+            sku:a3cucn95wxqxvg0r2mge70ay
+            price:btaral3r3stdaaf8hqezv189
+            full_name:oc1jblzn43ce044xjijoj5ka
+        }
+        }
+    }
+    }`, variables: {
+    "where": {
+        "list_gfksgqxqqf5v1r9xwnx2mx0t": {
+        "list_aobcevtk024vownl3ekhmg6u": {
+            "kycp2g09n2qp6k4mxxnzlj3k": {
+            "hasKey": __req.path
+            }
+        }
+        },
+        "list_gwtuz6s83hc28tbjjmhh7l84": {
+        "list_egwyrwihsmtwir2fcin633r6": {
+            "oj8syp8p47eoa7bmmvqa5mw4": {
+            "hasKey": "landing"
+            }
+        }
+        }
+    }
+    } }),
+            headers: {
+            "Content-Type": "application/json",
+            },
+            maxRedirects: 20,
+        });
+    
+    product = res?.data?.data?.landing?.[0]?.products?.[0]
+
+    if ( product ) {
+        checkoutstate = Object.assign( checkoutstate, {
+            product,
+            variants: product.variants || [],
+            mode: "dudusales",
+            forms: [
+                {
+                    type: "ladipage",
+                    config: {
+                        ladipage_id: "61b30bf189be2200136ca060",
+                        form_config_id: "6202a30c4f44450012e22d6e",
+                    },
+                },
+                {
+                    type: "telegram",
+                    config: {
+                        token: "1436204749:AAH3CvQecMyK8p0ImLK35MqMvVgR4Jql3Mw",
+                        group_id: "-773573707",
+                    },
+                },
+            ],
+            autoPixel: true
+        });
+        delete checkoutstate.product.variants;
+    } else {
+        product = null;
+    };%>
+%>
+
+<link href="/landing.css" rel="stylesheet" type="text/css">
+
+
+<meta name="google-site-verification" content="<%- google_site_verification -%>" />
+<!-- Meta Pixel Code -->
+<!-- <script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?dsfdsfds
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '574512194640185');
+fbq('track', 'PageView');
+</script> -->
+<!-- <noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=574512194640185&ev=PageView&noscript=1"
+/></noscript> -->
+<!-- End Meta Pixel Code -->
+<script type="text/javascript"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=<%- mainGtagId -%>"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  <% gtagId.forEach(function(_id){ %>
+    <%- `gtag('config', '${_id}', { 'allow_enhanced_conversions':true });` %>
+  <% }); %>
+  <% awList.forEach(function(_id){ %>
+    <%- `gtag('config', '${_id}', { 'groups': 'purchase' });` %>
+  <% }); %>
+  gtag('event', 'page_view');
+</script>
+
+<script>
+  window["CommentState"] = window["CommentState"] || {};
+
+  let config = null;
+
+  let comment_default = {
+    isDisplay: true,
+    icon_url: "https://w.ladicdn.com/s250x250/5b39a35979c7e420514fbfc4/icon-fb-20200627185646.png",
+    reaction_amount: "Tuấn Quỳnh và 16548 người khác",
+    comment_amount: "21875 Bình Luận",
+    comment_wait: "Ai đó đang nhập bình luận ...",
+    fanpge_name: "Cơ Khí Nhập Khẩu",
+    fanpage_link: "https://www.facebook.com/profile.php?id=100079822181597",
+    fanpage_thumbnail: "https://statics.pancake.vn/web-media/68/0e/49/03/b7aec90a187581b0393ebcfc3cbe3b12a72841c5c500997da36d46bd.jpg",
+    comments: [
+        {
+            thumbnail: "https://statics.pancake.vn/web-media/20/d3/a1/b7/50938fa508babe757202f7d0ecea37f5e398aee51359e3375c9cc4eb.jpg",
+            name: "Chi Lang",
+            link: "https://www.facebook.com/profile.php?id=100027992121865",
+            text: "Đặt 1 cái nhé shop. 0348682121. khóm 4 thị trấn Cầu kè trà vinh ",
+            time: "17 phút",
+            replies: [
+                {
+                    text: "Dạ, bên em lên đơn gửi hàng cho mình nhanh luôn ạ, anh chờ hàng giúp em 3-4 ngày anh nhé!",
+                    time: "21 phút",
+                },
+            ],
+        },
+        {
+            thumbnail: "https://statics.pancake.vn/web-media/9f/27/fb/14/dfad2cc3ddd551fab2acc0cac96164959d9971e686c6af488664f678.jpg",
+            name: "Nam Nung",
+            link: "https://www.facebook.com/chauvietduchn",
+            text: "Hàng ổn lắm, mới xài 1 cục 1 cục để dành :)",
+            time: "24 phút",
+            replies: [
+                {
+                    text: "Dạ em cảm ơn chị đã ủng hộ shop ạ!",
+                    time: "27 phút",
+                },
+            ],
+        },
+        {
+            thumbnail: "https://statics.pancake.vn/web-media/5f/f9/f6/dc/533c0006693691fcb09c4336377ce1309b3e66ca10eef912fab89858.jpg",
+            name: "Bùi Chiến Lực",
+            link: "https://www.facebook.com/lohoitree",
+            text: "vận chuyển cần thận quá",
+            time: "33 phút",
+            replies: [
+                {
+                    text: "Dạ em cảm ơn anh đã ủng hộ shop ạ.",
+                    time: "39 phút",
+                },
+            ],
+        },
+        {
+            thumbnail: "https://statics.pancake.vn/web-media/6c/b0/11/8d/4e685913e6b21095c4a93bad14844bbeca9b45c448276a35374c1ab2.jpg",
+            name: "Hanh Limo",
+            link: "https://www.facebook.com/thang.pt.146",
+            text: "máy làm việc ngon nhé, shop cho nhiều phụ kiện quá",
+            time: "44 phút",
+            replies: [
+                {
+                    text: "Dạ em cảm ơn anh đã tin dùng sản phẩm của shop ạ.",
+                    time: "52 phút",
+                },
+            ],
+        },
+        {
+            thumbnail: "https://statics.pancake.vn/web-media/6c/b0/11/8d/4e685913e6b21095c4a93bad14844bbeca9b45c448276a35374c1ab2.jpg",
+            name: "Trịnh Nữu Năm",
+            link: "https://www.facebook.com/profile.php?id=100034638773554",
+            text: "0908746352 tư ván cho tôi một cái",
+            time: "1 giờ",
+            replies: [
+                {
+                    text: "Dạ vâng ạ, bên em sẽ gọi điện lại xác nhận với anh liền ạ.",
+                    time: "1 giờ",
+                },
+            ],
+        },
+        {
+            thumbnail: "https://statics.pancake.vn/web-media/77/20/7d/d9/2da97549dcbf6d4f70d688959363db46987c5e06506edf477ff6c3df.jpg",
+            name: "Pham Huong",
+            link: "https://www.facebook.com/vjetdung.le.1",
+            text: "có máy cưa xích pin không, 0374852934, có thì alo nhé",
+            time: "1 giờ",
+            replies: [
+                {
+                    text: "Dạ em cảm ơn anh đã quan tâm đên sản phẩm bên em. Bên em có máy cưa pin anh nhé. Nhân viên công ty em sẽ liên hệ lại tư vấn cho mình ạ.",
+                    time: "1 giờ",
+                },
+            ],
+        },
+    ],
+};
+
+    window["CheckoutState"] = Object.assign(window["CheckoutState"] || {}, <%- JSON.stringify(checkoutstate); %> );
+    if ( ["/drill-makita-199v", "/lawn-mover-lapusen-36v", "/saw-hitachi-199v-20cm", "/wash-car-hitachi-199v", "/grinder-makita-199v", "/grinder-hitachi-199v", "/wrench-hitachi-199v", "/saw-makita-199v-20cm", "/wrench-dewalt-20v", "/wrench-hitachi-20v", "/drill-dewalt-72v", "/drill-makita-72v", "/drill-bosch-72v", "/drill-dewalt-199v"].includes(window.location.pathname)) {
+        window["CommentState"] = window["CommentState"] || {};
+        window["CommentState"] = Object.assign( window["CommentState"], comment_default);
+    }
+  
+</script>

@@ -131,5 +131,33 @@
         "subpath": "",
         "builtin": false,
         "known": false
+    },
+    "bcrypt": {
+        "spec": "bcrypt",
+        "module": "bcrypt",
+        "subpath": "",
+        "builtin": false,
+        "known": false
+    },
+    "binance-api-node": {
+        "spec": "binance-api-node",
+        "module": "binance-api-node",
+        "subpath": "",
+        "builtin": false,
+        "known": false
+    },
+    "formidable": {
+        "spec": "formidable",
+        "module": "formidable",
+        "subpath": "",
+        "builtin": false,
+        "known": false
+    },
+    "multer": {
+        "spec": "multer",
+        "module": "multer",
+        "subpath": "",
+        "builtin": false,
+        "known": false
     }
 }

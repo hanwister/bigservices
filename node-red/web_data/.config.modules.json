@@ -1,0 +1,114 @@
+{
+    "express": {
+        "spec": "express",
+        "module": "express",
+        "subpath": "",
+        "builtin": false,
+        "known": false
+    },
+    "cors": {
+        "spec": "cors",
+        "module": "cors",
+        "subpath": "",
+        "builtin": false,
+        "known": false
+    },
+    "body-parser": {
+        "spec": "body-parser",
+        "module": "body-parser",
+        "subpath": "",
+        "builtin": false,
+        "known": false
+    },
+    "socket.io-client": {
+        "spec": "socket.io-client",
+        "module": "socket.io-client",
+        "subpath": "",
+        "builtin": false,
+        "known": false
+    },
+    "rfc6902": {
+        "spec": "rfc6902",
+        "module": "rfc6902",
+        "subpath": "",
+        "builtin": false,
+        "known": false
+    },
+    "@paralleldrive/cuid2": {
+        "spec": "@paralleldrive/cuid2",
+        "module": "@paralleldrive/cuid2",
+        "subpath": "",
+        "builtin": false,
+        "known": false
+    },
+    "ejs": {
+        "spec": "ejs",
+        "module": "ejs",
+        "subpath": "",
+        "builtin": false,
+        "known": false
+    },
+    "axios": {
+        "spec": "axios",
+        "module": "axios",
+        "subpath": "",
+        "builtin": false,
+        "known": false
+    },
+    "bullmq": {
+        "spec": "bullmq",
+        "module": "bullmq",
+        "subpath": "",
+        "builtin": false,
+        "known": false
+    },
+    "ioredis": {
+        "spec": "ioredis",
+        "module": "ioredis",
+        "subpath": "",
+        "builtin": false,
+        "known": false
+    },
+    "socket.io": {
+        "spec": "socket.io",
+        "module": "socket.io",
+        "subpath": "",
+        "builtin": false,
+        "known": false
+    },
+    "ws": {
+        "spec": "ws",
+        "module": "ws",
+        "subpath": "",
+        "builtin": false,
+        "known": false
+    },
+    "formidable": {
+        "spec": "formidable",
+        "module": "formidable",
+        "subpath": "",
+        "builtin": false,
+        "known": false
+    },
+    "multer": {
+        "spec": "multer",
+        "module": "multer",
+        "subpath": "",
+        "builtin": false,
+        "known": false
+    },
+    "@aws-sdk/lib-storage": {
+        "spec": "@aws-sdk/lib-storage",
+        "module": "@aws-sdk/lib-storage",
+        "subpath": "",
+        "builtin": false,
+        "known": false
+    },
+    "@aws-sdk/s3-request-presigner": {
+        "spec": "@aws-sdk/s3-request-presigner",
+        "module": "@aws-sdk/s3-request-presigner",
+        "subpath": "",
+        "builtin": false,
+        "known": false
+    }
+}

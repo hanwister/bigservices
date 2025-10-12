@@ -35,7 +35,7 @@
         "id": "772c07f1f620c995",
         "type": "tab",
         "label": "Bull Queue Dashboard",
-        "disabled": false,
+        "disabled": true,
         "info": "",
         "env": []
     },
@@ -43,6 +43,22 @@
         "id": "c23a997595de5280",
         "type": "tab",
         "label": "Process query apollo",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "18caed853880999b",
+        "type": "tab",
+        "label": "Binance",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "af13c7f5e79b8c40",
+        "type": "tab",
+        "label": "Binance Futures P&L",
         "disabled": false,
         "info": "",
         "env": []
@@ -282,6 +298,16 @@
                 "name": "SERVER_SSH",
                 "value": "{\"host\":\"remote1.tolife.me\",\"port\":22,\"username\":\"root\",\"password\":\"anh08091998t\"}",
                 "type": "json"
+            },
+            {
+                "name": "BINANCE_APY_KEY",
+                "value": "3XB35QbcNmAfiLHlovMYp3HBcrzlNoXfORUziwFYqgFCQNMkuZke513l12g9kfq5",
+                "type": "str"
+            },
+            {
+                "name": "BINANCE_API_SECRET",
+                "value": "vIA3sbOKI9sXdRVnuIny3y56fuklKTC8XYOtgddrQaz355YrattaFktRa9aDPjZN",
+                "type": "str"
             }
         ],
         "modules": {}
@@ -1965,10 +1991,10 @@
         "type": "function",
         "z": "c23a997595de5280",
         "name": "Convert Subscription To Hasura",
-        "func": "let { mode, action, objectQuery, context: contextValue, resolveNow } = msg.payload;\nconsole.log('convert', mode, action)\ntry {\n    node.send([{\n        topic: \"parse\",\n        payload: await context.get(\"queryNow\")( contextValue.id, mode, action, data, true),\n        type: \"start\",\n        objectQuery,\n        mode,\n        action,\n        contextValue,\n        resolveNow\n    }])\n    node.status({\n        fill: \"green\",\n        shape: \"ring\",\n        text: contextValue.id\n    })\n} catch (err) {\n    console.log(err.message)\n}\nreturn null;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ",
+        "func": "let { mode, action, objectQuery, context: contextValue, resolveNow } = msg.payload;\nconsole.log('convert', mode, action)\ntry {\n    node.send([{\n        topic: \"parse\",\n        payload: await context.get(\"queryNow\")( contextValue.id, mode, action, objectQuery, true),\n        type: \"start\",\n        objectQuery,\n        mode,\n        action,\n        contextValue,\n        resolveNow\n    }])\n    node.status({\n        fill: \"green\",\n        shape: \"ring\",\n        text: contextValue.id\n    })\n} catch (err) {\n    console.log(err.message)\n}\nreturn null;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   ",
         "outputs": 1,
         "timeout": 0,
-        "noerr": 1,
+        "noerr": 0,
         "initialize": "const { createId } = paralleldriveCuid2;\n\nconst filterPrismaToHasuraInWhere = new Map([\n     [\"neq\", [\"_neq\"]],\n     [\"eq\", [\"_eq\"]],\n     [\"equals\", [\"_eq\"]],\n     [\"lte\", [\"[_lte\"]],\n     [\"lt\", [\"_lt\"]],\n     [\"gte\", [\"_gte\"]],\n     [\"gt\", [\"_gt\"]],\n     [\"in\", [\"_in\"]],\n     [\"notIn\", [\"_nin\"]],\n     [\"like\", [\"_like\"]],\n     [\"iLike\", [\"_ilike\"]],\n     [\"regex\", [\"_regex\"]],\n     [\"iRegex\", [\"_iregex\"]],\n     [\"hasKey\", [\"_has_key\"]],\n     [\"isNull\", [\"_is_null\"]],\n ]);\n\nconst filterPrismaToHasura = new Map([\n       [\"neq\", [\"_neq\"]],\n       [\"eq\", [\"_eq\"]],\n       [\"equals\", [\"_eq\"]],\n       [\"lte\", [\"[_lte\"]],\n       [\"lt\", [\"_lt\"]],\n       [\"gte\", [\"_gte\"]],\n       [\"gt\", [\"_gt\"]],\n       [\"in\", [\"_in\"]],\n       [\"notIn\", [\"_nin\"]],\n       [\"like\", [\"_like\"]],\n       [\"iLike\", [\"_ilike\"]],\n       [\"regex\", [\"_regex\"]],\n       [\"iRegex\", [\"_iregex\"]],\n       [\"and\", [\"_and\"]],\n       [\"or\", [\"_or\"]],\n       [\"not\", [\"_not\"]],\n       [\"distinctOn\", [\"distinct_on\"]],\n       [\"orderBy\", [\"order_by\"]],\n       [\"hasKey\", [\"_has_key\"]],\n       [\"cast\", [\"_cast\"]],\n       [\"String\", [\"String\"]],\n       [\"path\", [\"path\"]],\n   ]);\n\nconst generatedHasuraVariables = (objectQuery, type = undefined, zone = '', level = '') => {\n    objectQuery.variables.where = { and: [objectQuery.variables.where || {}, { deletedAt: { isNull: true } }] }\n    let generatedHasuraVariablesZone = (variables, type = undefined) => {\n        return Object.fromEntries(Object.entries(variables).map(([key, val]) => {\n            let test_key = filterPrismaToHasuraInWhere.get(key);\n            if (test_key) {\n                return [test_key, val]\n            } else {\n                let _type = type || key;\n                let new_key = [...filterPrismaToHasura.get(key) || [key]][0];\n                if (val && [\"and\", \"or\", \"not\"].includes(key) && Object.prototype.toString.call(val) === '[object Array]') {\n                    return [new_key, val.map(_val => generatedHasuraVariablesZone(_val, _type))]\n                } else if (val && !filterPrismaToHasuraInWhere.has(key) && Object.prototype.toString.call(val) === '[object Object]') {\n                    if (new_key.startsWith(\"list\")) {\n                        return [new_key, generatedHasuraVariablesZone({ and: [{ deletedAt: { isNull: true } }, val] }, _type)]\n                    } else {\n                        return [new_key, generatedHasuraVariablesZone(val, _type)]\n                    }\n                } else {\n                    return [new_key, val]\n                }\n            }\n        }))\n    }\n    return Object.fromEntries([...Object.entries(generatedHasuraVariablesZone(objectQuery.variables)).map(([key, val]) => [`${key}_${zone}_${level}`, val]),\n    ...objectQuery.links.map((childQuery, childQueryIndex) => Object.entries(generatedHasuraVariables(childQuery, undefined, `${zone}${level}`, childQueryIndex))).flat()\n    ])\n}\n\nconst target_begin = {\n    get: ``,\n    list: ``,\n    aggregate: ``,\n    create: 'insert_',\n    update: \"update_\"\n}\n\nconst target_end = {\n    get: ``,\n    list: ``,\n    aggregate: `_aggregate`,\n    create: '_one',\n    update: \"_by_pk\"\n}\n\nconst generatedHasuraQuery = (type, action, objectQuery, root = true, zone = '', level = '') => {\n    return `${([\"socket\", \"subscription\"].includes(type)) ? `${[...objectQuery.target].shift()}:` : (root ? \"data:\" : \"\")}${objectQuery.schema ? `${root ? `${objectQuery.schema}_` : \"\"}${objectQuery.target.slice(-1)}${target_end[action]}` : objectQuery.target.slice(-1)[0]}\n    ${Object.keys(objectQuery.variables).length > 0 ? `(${(() => {\n            let trans_variables = Object.keys(objectQuery.variables).map(k => (filterPrismaToHasura.get(k) || [k])[0]);\n            return [\n                [\"where\", `$where_${zone}_${level}`],\n                [\"order_by\", `$order_by_${zone}_${level}`],\n                [\"distinct_on\", `$distinct_on_${zone}_${level}`],\n                [\"limit\", `$limit_${zone}_${level}`],\n                [\"offset\", `$offset_${zone}_${level}`],\n            ].filter(([key, val]) => trans_variables.includes(key)).map((x) => x.join(\": \")).join(\", \")\n\n        })()\n            })` : \"\"} {\n            ${objectQuery.fields.map((x) => `${(x.length > 1 && [\"socket\", \"subscription\"].includes(type)) ? `${x.slice(0, 1)[0]}:` : \"\"}${x.slice(-1)[0]}`).join(\"\\n\")}\n            ${objectQuery.links.map((x, linkIndex) => generatedHasuraQuery(type, action, x, false, `${zone}${level}`, linkIndex))}\n        }`;\n}\n\nconst generateHasuraVariablesType = (objectQuery, zone = '', level = '') => {\n    let table = `${objectQuery.schema}_${[...objectQuery.target].pop().replace(\"list_\", \"\")}`\n    let keys = Object.keys(objectQuery.variables).map(k => (filterPrismaToHasura.get(k) || [k])[0]);\n    let tt = [...[\n        [\"where\", `${table}_bool_exp`],\n        [\"order_by\", `[${table}_order_by!]`],\n        [\"distinct_on\", `[${table}_select_column!]`],\n        [\"limit\", `Int`],\n        [\"offset\", `Int`],\n    ].filter(([key, val]) => keys.includes(key)).map(([key, val]) => `$${key}_${zone}_${level}: ${val}`),\n    ...objectQuery.links.map((childQuery, childQueryIndex) => generateHasuraVariablesType(childQuery, `${zone}${level}`, childQueryIndex))\n    ]\n    return tt.filter(x => x).join(\",\")\n}\n\nconst generateHasuraObject = (id, mode, action, objectQuery, root = true) => {\n    if (objectQuery.variables.id) {\n        objectQuery.variables[\"where\"] = objectQuery.variables[\"where\"] || {};\n        objectQuery.variables[\"where\"][\"id\"] = { _eq: objectQuery.variables.id };\n        delete objectQuery.variables.id;\n    }\n\n    let table = `${objectQuery.schema}_${objectQuery.target.slice(-1)[0]}`\n    let _variables = generatedHasuraVariables(objectQuery);\n    let _variablesType = generateHasuraVariablesType(objectQuery);\n    let _query = generatedHasuraQuery(mode, action, objectQuery);\n\n    return ({\n        query: `${mode === \"subscription\" ? mode : \"query\"} ${id}${_variablesType ? ` (${_variablesType}) ` : \"\"}{ ${_query} }`,\n        variables: _variables\n    })\n}\n\nconst applyRole = async (action, objectQuery) => {\n    // objectQuery.user = {};\n    // if (objectQuery.headers['authorization'] && objectQuery.headers['authorization']['startsWith'](\"Bearer \")) {\n    //     let token = objectQuery.headers['authorization'].slice(7)\n    //     let payload = jwt.verify(token, await jwt.getPrivateKey(), { algorithm: \"HS512\" })\n    //     objectQuery.user['id'] = payload.userId;\n    // }\n\n    objectQuery.links.map(childObjectQuery => applyRole(action, Object.assign(childObjectQuery, { headers: objectQuery.headers })))\n    // if ([\"get\", \"list\"].includes(action)) {\n    //     if (objectQuery.variables.id) {\n    //         objectQuery.variables[\"where\"] = objectQuery.variables[\"where\"] || {};\n    //         objectQuery.variables[\"where\"][\"id\"] = { _eq: objectQuery.variables.id };\n    //         delete objectQuery.variables.id;\n    //     }\n    //     let getter = getters.get(objectQuery.target[1])\n    //     if (getter) {\n    //         await getter.bind(objectQuery)()\n    //     }\n    // } else if ([\"create\", \"update\"].includes(action)) {\n    //     let setter = setters.get(objectQuery.target[1]);\n    //     if (setter) {\n    //         await setter.bind(objectQuery)()\n    //     }\n    // }\n    return objectQuery\n}\n\nconst queryNow = async (id, mode, action, objectQuery, socket = false, callback = () => { }) => {\n    id = id || createId()\n    objectQuery = await applyRole(action, objectQuery) || objectQuery;\n    let _query2 = generateHasuraObject(id, socket ? \"subscription\" : \"query\", action, objectQuery);\n    return _query2\n    // await sendData(id, { operationName: id, ..._query2 }, \"start\");\n    // return await new Promise((resolve, reject) => {\n    //     emitter.once(id, async (_preDeleteRecord) => {\n    //         resolve(_preDeleteRecord)\n    //     })\n    // })\n};\ncontext.set(\"queryNow\", queryNow)",
         "finalize": "",
         "libs": [
@@ -2218,5 +2244,226 @@
                 "5fad62146d4956ef"
             ]
         ]
+    },
+    {
+        "id": "0cd032db82ea035a",
+        "type": "inject",
+        "z": "18caed853880999b",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 120,
+        "y": 560,
+        "wires": [
+            [
+                "ef317916f434023c",
+                "88639a9af1475e4a"
+            ]
+        ]
+    },
+    {
+        "id": "ef317916f434023c",
+        "type": "function",
+        "z": "18caed853880999b",
+        "d": true,
+        "name": "Set MainClient",
+        "func": "var { MainClient } = binance;\n\n// or, if you prefer `require()`:\n// const { MainClient } = require('binance');\n\nconst API_KEY = 'xxx';\nconst API_SECRET = 'yyy';\n\nconst client = new MainClient({\n    api_key: \"3XB35QbcNmAfiLHlovMYp3HBcrzlNoXfORUziwFYqgFCQNMkuZke513l12g9kfq5\",\n    api_secret: \"vIA3sbOKI9sXdRVnuIny3y56fuklKTC8XYOtgddrQaz355YrattaFktRa9aDPjZN\",\n    // Connect to testnet environment\n    // testnet: true,\n});\n\nflow.set(\"binance\", client)\n\n// client\n//     .getAccountTradeList({ symbol: 'BTCUSDT' })\n//     .then((result) => {\n//         console.log('getAccountTradeList result: ', result);\n//     })\n//     .catch((err) => {\n//         console.error('getAccountTradeList error: ', err);\n//     });\n\n// client\n//     .getExchangeInfo()\n//     .then((result) => {\n//         console.log('getExchangeInfo inverse result: ', result);\n//     })\n//     .catch((err) => {\n//         console.error('getExchangeInfo inverse error: ', err);\n//     });\nnode.send({})",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "binance",
+                "module": "binance"
+            }
+        ],
+        "x": 480,
+        "y": 220,
+        "wires": [
+            [
+                "313e5a6a58728ee2"
+            ]
+        ]
+    },
+    {
+        "id": "313e5a6a58728ee2",
+        "type": "function",
+        "z": "18caed853880999b",
+        "name": "Get price and qty",
+        "func": "await new Promise(( resolve, reject) => {\n    flow.get(\"binance\")\n        .getAccountTradeList({ symbol: 'MEMEUSDT' })\n        .then((result) => {\n            node.status({fill:\"red\",shape:\"ring\",text: `${'getAccountTradeList result'}: ${result[0]?.price} - ${result[0]?.qty}`});\n            console.log('getAccountTradeList result: ', result);\n            resolve(null)\n        })\n        .catch((err) => {\n            console.error('getAccountTradeList error: ', err);\n        });\n})\n\n// client\n//     .getExchangeInfo()\n//     .then((result) => {\n//         console.log('getExchangeInfo inverse result: ', result);\n//     })\n//     .catch((err) => {\n//         console.error('getExchangeInfo inverse error: ', err);\n//     });\n\nreturn null",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "binance",
+                "module": "binance"
+            }
+        ],
+        "x": 490,
+        "y": 320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "88639a9af1475e4a",
+        "type": "function",
+        "z": "18caed853880999b",
+        "name": "Set USDMClient",
+        "func": "var { USDMClient } = binance;\n\n// or, if you prefer `require()`:\n// const { MainClient } = require('binance');\n\nconst API_KEY = 'xxx';\nconst API_SECRET = 'yyy';\n\nconst client = new USDMClient({\n    api_key: \"3XB35QbcNmAfiLHlovMYp3HBcrzlNoXfORUziwFYqgFCQNMkuZke513l12g9kfq5\",\n    api_secret: \"vIA3sbOKI9sXdRVnuIny3y56fuklKTC8XYOtgddrQaz355YrattaFktRa9aDPjZN\",\n    // Connect to testnet environment\n    // testnet: true,\n});\n\nflow.set(\"USDMClient\", client)\n\nclient\n  .getBalance()\n  .then((result) => {\n    console.log('getBalance result: ', result);\n  })\n  .catch((err) => {\n    console.error('getBalance error: ', err);\n  });\n\n// client\n//     .getExchangeInfo()\n//     .then((result) => {\n//         console.log('getExchangeInfo inverse result: ', result);\n//     })\n//     .catch((err) => {\n//         console.error('getExchangeInfo inverse error: ', err);\n//     });\nnode.send({})",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "binance",
+                "module": "binance"
+            }
+        ],
+        "x": 400,
+        "y": 600,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "939493ad0139f82c",
+        "type": "function",
+        "z": "18caed853880999b",
+        "name": "Submit New Order",
+        "func": "await new Promise(( resolve, reject) => {\n    flow.get(\"USDMClient\")\n        .submitNewOrder({\n            side: 'SELL',\n            symbol: 'BTCUSDT',\n            type: 'MARKET',\n            quantity: 0.001,\n        })\n        .then((result) => {\n            console.log('submitNewOrder result: ', result);\n        })\n        .catch((err) => {\n            console.error('submitNewOrder error: ', err);\n        });\n})\n\n// client\n//     .getExchangeInfo()\n//     .then((result) => {\n//         console.log('getExchangeInfo inverse result: ', result);\n//     })\n//     .catch((err) => {\n//         console.error('getExchangeInfo inverse error: ', err);\n//     });\n\nreturn null",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "binance",
+                "module": "binance"
+            }
+        ],
+        "x": 690,
+        "y": 600,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "44cf2450dae251bd",
+        "type": "inject",
+        "z": "af13c7f5e79b8c40",
+        "name": "Trigger P&L Check",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 140,
+        "y": 140,
+        "wires": [
+            [
+                "8bd0dab039326632"
+            ]
+        ]
+    },
+    {
+        "id": "8bd0dab039326632",
+        "type": "function",
+        "z": "af13c7f5e79b8c40",
+        "name": "1. Set USDMClient",
+        "func": "var Binance = binanceApiNode.default;\n\n// ⚠️ THAY THẾ API KEY/SECRET CỦA BẠN TẠI ĐÂY\nconst API_KEY = env.get('BINANCE_APY_KEY');\nconst API_SECRET = env.get('BINANCE_API_SECRET');\n\nconst client = new Binance({\n    apiKey: API_KEY,\n    apiSecret: API_SECRET,\n    // testnet: true, // Bỏ comment nếu dùng testnet\n});\n\nflow.set(\"USDMClient\", client)\n\nmsg.client = client;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "binanceApiNode",
+                "module": "binance-api-node"
+            }
+        ],
+        "x": 390,
+        "y": 140,
+        "wires": [
+            [
+                "caf096599c917c0b"
+            ]
+        ]
+    },
+    {
+        "id": "caf096599c917c0b",
+        "type": "function",
+        "z": "af13c7f5e79b8c40",
+        "name": "2. Get Open Positions & P&L",
+        "func": "const client = msg.client;\n\n// Sử dụng getPositionRisk để lấy các vị thế đang mở\n// await client.getPositionRisk()\n//     .then((positions) => {\n//         // Lọc các vị thế có 'positionAmt' khác 0 (vị thế đang mở)\n//         const openPositions = positions.filter(p => parseFloat(p.positionAmt) !== 0);\n        \n//         if (openPositions.length === 0) {\n//             node.warn(\"Không có vị thế đang mở nào.\");\n//             msg.payload = \"Không có vị thế đang mở nào.\";\n//             return msg;\n//         }\n\n//         const results = openPositions.map(p => ({\n//             symbol: p.symbol,\n//             amount: p.positionAmt, // Số lượng (Long/Short)\n//             entryPrice: p.entryPrice, // Giá vào lệnh\n//             markPrice: p.markPrice, // Giá đánh dấu hiện tại\n//             unrealizedProfit: p.unRealizedProfit, // Lãi/Lỗ chưa thực hiện\n//             leverage: p.leverage, // Đòn bẩy\n//             // Các trường khác có thể bao gồm: isolatedWallet, marginType\n//         }));\n\n//         // Log kết quả ra console và payload\n//         console.log('Open Positions with P&L:', results);\n//         msg.payload = results;\n//         node.status({fill:\"green\",shape:\"dot\",text: `Found ${results.length} positions.`});\n//         return msg;\n//     })\n//     .catch((err) => {\n//         node.error('Error getting position risk: ' + err.message, msg);\n//         node.status({fill:\"red\",shape:\"dot\",text: \"API Error\"});\n//         return null; // Không chuyển message đi tiếp khi có lỗi\n//     });\n\nconst c = \"LINKUSDT\"\n\nawait client.futuresMarkPrice({ symbol: c}).then( result => {\n    node.status({fill:\"red\",shape:\"ring\",text:c + \": \" + result['markPrice']});\n})\nconsole.log(await client.futuresAllOrders())\nconsole.log(\n    await client.futuresGetOrder({\n        symbol: 'LINKUSDT',\n        orderId: 44438930210,\n    })\n)\n// Trả về null vì logic chính được xử lý trong Promise/await\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "binance",
+                "module": "binance"
+            }
+        ],
+        "x": 680,
+        "y": 140,
+        "wires": [
+            [
+                "a8c0b0c9aa71938a"
+            ]
+        ]
+    },
+    {
+        "id": "a8c0b0c9aa71938a",
+        "type": "debug",
+        "z": "af13c7f5e79b8c40",
+        "name": "Debug Output P&L",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 930,
+        "y": 140,
+        "wires": []
     }
 ]

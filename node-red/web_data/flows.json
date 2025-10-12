@@ -1,0 +1,981 @@
+[
+    {
+        "id": "2e0a33d53a902e50",
+        "type": "tab",
+        "label": "Web Serve",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "a52209a7262ea19f",
+        "type": "tab",
+        "label": "graphql Server Images",
+        "disabled": true,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "1e273549eda8541e",
+        "type": "subflow",
+        "name": "Queue Containers",
+        "info": "",
+        "category": "",
+        "in": [
+            {
+                "x": 180,
+                "y": 220,
+                "wires": [
+                    {
+                        "id": "8e1fa8b70b7d4a07"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 700,
+                "y": 260,
+                "wires": [
+                    {
+                        "id": "8e1fa8b70b7d4a07",
+                        "port": 1
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {},
+        "color": "#DDAA99",
+        "status": {
+            "x": 620,
+            "y": 180,
+            "wires": [
+                {
+                    "id": "8e1fa8b70b7d4a07",
+                    "port": 0
+                }
+            ]
+        }
+    },
+    {
+        "id": "5ed478d1a62e4007",
+        "type": "subflow",
+        "name": "Worker Containers",
+        "info": "",
+        "category": "",
+        "in": [
+            {
+                "x": 120,
+                "y": 200,
+                "wires": [
+                    {
+                        "id": "df501c152ac0adb1"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 540,
+                "y": 300,
+                "wires": [
+                    {
+                        "id": "df501c152ac0adb1",
+                        "port": 1
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {},
+        "color": "#DDAA99",
+        "status": {
+            "x": 520,
+            "y": 120,
+            "wires": [
+                {
+                    "id": "df501c152ac0adb1",
+                    "port": 0
+                }
+            ]
+        }
+    },
+    {
+        "id": "f56ecd1451d0649d",
+        "type": "global-config",
+        "env": [
+            {
+                "name": "GRAPHQL_URL",
+                "value": "http://192.168.31.199:4081",
+                "type": "str"
+            },
+            {
+                "name": "REDIS_CONNECTION",
+                "value": "{\"host\":\"remote1.tolife.me\",\"port\":6379,\"username\":\"default\",\"password\":\"anh08091998t\"}",
+                "type": "json"
+            }
+        ],
+        "modules": {}
+    },
+    {
+        "id": "8e1fa8b70b7d4a07",
+        "type": "function",
+        "z": "1e273549eda8541e",
+        "name": "Start Queue Container",
+        "func": "// Code added here will be run once\n// whenever the node is started.\nconst { Queue, QueueEvents } = bullmq;\nconst IORedis = ioredis;\n\nconst connection = new IORedis(env.get(\"REDIS_URL\") || env.get(\"REDIS_CONNECTION\"), { maxRetriesPerRequest: null, connectionName: 'rayman',\n  connectTimeout: 1000,\n  retryStrategy: () => {\n    return false;\n  } });\nconsole.log(env.get(\"REDIS_URL\") || env.get(\"REDIS_CONNECTION\"))\n\nvar queues = {};\nvar eventQueues = {};\n\n( async () => {\n    await node.send([{\n        topic: \"status\",\n        payload: {\n            fill: \"red\",\n            shape: \"ring\",\n            text: \"Starting Queue Containers\"\n        }\n    }]);\n    await global.set(\"sendJobToQueue\", async (queueName, jobName, jobData, jobOptions = {}) => {\n        if (!queues[queueName]) {\n            queues[queueName] = await new Queue(queueName, { connection });\n            eventQueues[queueName] = await new QueueEvents(queueName, { connection });\n        };\n        var job = await queues[queueName].add(jobName, jobData, Object.assign({ removeOnComplete: 1000, removeOnFail: 5000 }, jobOptions));\n        const result = await job.waitUntilFinished(eventQueues[queueName]);\n        return result\n    });\n    await global.set(\"getQueue\", async (queueName) => {\n        if (!queues[queueName]) {\n            queues[queueName] = await new Queue(queueName, { connection });\n            eventQueues[queueName] = await new QueueEvents(queueName, { connection });\n            node.send([{\n                topic: \"status\",\n                payload: {\n                    fill: \"red\",\n                    shape: \"ring\",\n                    text: \"Starting Queue: \" + queueName\n                }\n            }]);\n        };\n        let queueJob = async (jobName, jobData, jobOptions = {}) => {\n            var job = await queues[queueName].add(jobName, jobData, jobOptions);\n            const result = await job.waitUntilFinished(eventQueues[queueName]);\n            return result\n        };\n        return queueJob\n    });\n    await node.send([{\n        topic: \"status\",\n        payload: {\n            fill: \"red\",\n            shape: \"ring\",\n            text: \"Running Queue Containers \"\n        }\n    }]);\n    node.send([null,{}])\n})()",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "bullmq",
+                "module": "bullmq"
+            },
+            {
+                "var": "ioredis",
+                "module": "ioredis"
+            }
+        ],
+        "x": 420,
+        "y": 220,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "df501c152ac0adb1",
+        "type": "function",
+        "z": "5ed478d1a62e4007",
+        "name": "Worker",
+        "func": "const { Worker } = bullmq;\nconst IORedis = ioredis;\n\nconst connection = new IORedis(env.get(\"REDIS_URL\") || env.get(\"REDIS_CONNECTION\"), { maxRetriesPerRequest: null });\nconsole.log(\"worker\", env.get(\"REDIS_URL\") || env.get(\"REDIS_CONNECTION\"))\nvar workers = {};\n\n( async () => {\n    await node.send([{\n        topic: \"status\",\n        payload: {\n            fill: \"red\",\n            shape: \"ring\",\n            text: \"Starting Worker Containers\"\n        }\n    }]);\n    await global.set(\"setWorker\", async (queueName, workerRun, options) => {\n        if (workers[queueName]) {\n            await workers[queueName].pause(true)\n        };\n        workers[queueName] = await new Worker(queueName, async (job) => {\n            workerRun(job)\n        }, { options, connection })\n    })\n    await node.send([{\n        topic: \"status\",\n        payload: {\n            fill: \"red\",\n            shape: \"ring\",\n            text: \"Running Worker Containers\"\n        }\n    }]);\n    await node.send([null, {}]);\n    // await flow.get(\"emitter\").emit(\"initWebApp\", {})\n})()",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "// Code added here will be run when the\n// node is being stopped or re-deployed.\ncontext.get(\"Worker\").pause(true);",
+        "libs": [
+            {
+                "var": "bullmq",
+                "module": "bullmq"
+            },
+            {
+                "var": "ioredis",
+                "module": "ioredis"
+            }
+        ],
+        "x": 280,
+        "y": 200,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "66065feda92b32c6",
+        "type": "inject",
+        "z": "2e0a33d53a902e50",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "3",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 1260,
+        "wires": [
+            [
+                "fd7d83e93d9d4fc0"
+            ]
+        ]
+    },
+    {
+        "id": "fd7d83e93d9d4fc0",
+        "type": "function",
+        "z": "2e0a33d53a902e50",
+        "name": "Init Server",
+        "func": "\nawait node.status({\n    fill: \"red\",\n    shape: \"ring\",\n    text: \"Starting at: \" + new Date()\n})\nlet payload = await context.get(\"init\")()\nawait node.status({\n    fill: \"red\",\n    shape: \"ring\",\n    text: \"Running at: \" + new Date()\n});\n\nnode.send({})",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "const { createServer, request } = http;\n\nvar app = express();\nvar server = createServer(app);\nvar init = false;\n\nvar main = async () => {\n    app.use(cors({\n        \"origin\": \"*\",\n        \"methods\": \"GET,HEAD,PUT,PATCH,POST,DELETE\",\n        // \"preflightContinue\": false,\n        // \"optionsSuccessStatus\": 204\n    }));\n    // app.use(bodyParser.json());\n\n    try {\n        server.listen(3080, '0.0.0.0', () => {\n            console.log(`GRAPHQL running in port ${3080}`)\n            flow.set(\"webServer\", server);\n            flow.set(\"webApp\", app);\n            node.send({\n                app, server\n            })\n        });\n    } catch (err) {\n        console.log(err.message)\n    }\n    \n\n}\n\ncontext.set(\"init\", async () => {\n    if (!init) {\n        await main();\n        // app.get(\"*\", async (__req, __res) => {\n        //     let time = Date.now()\n        //     node.status({ fill: \"red\", shape: \"ring\", text: \"message\\nsadsad\" });\n        //     console.log(\"start get\", __req.path)\n        //     try {\n        //         if (__req.path === \"/\") {\n        //             Object.defineProperties(__req, {\n        //                 path: { value: \"/index\", writable: true, enumerable: true, configurable: true },\n        //             });\n        //         };\n        //         // __res.set({ 'Content-Type': Helper.getMime(url.parse(__req.url, true)) })\n        //         // await findData({ __req, __res, level: 1, hostname: __req.hostname, path: __req.path });\n        //     } catch (err) {\n        //         __res.send(err.message);\n        //     }\n        //     __res.send('dsfsdf');\n        //     __res.end()\n        //     console.log(\"end get\", __req.path, Date.now() - time)\n        // })\n        return { app, server }\n    };\n    init = true\n})\n\n",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "http",
+                "module": "http"
+            },
+            {
+                "var": "express",
+                "module": "express"
+            },
+            {
+                "var": "cors",
+                "module": "cors"
+            },
+            {
+                "var": "bodyParser",
+                "module": "body-parser"
+            }
+        ],
+        "x": 380,
+        "y": 1260,
+        "wires": [
+            [
+                "37e97c0c3908f8e0",
+                "bde4a9bdb9061a3b",
+                "cf1144606b63a99f"
+            ]
+        ]
+    },
+    {
+        "id": "77eb926e9c56ae9c",
+        "type": "function",
+        "z": "2e0a33d53a902e50",
+        "name": "Start LadiPage Server",
+        "func": "node.status({\n    shape: \"ring\",\n    text: \"Starting\"\n})\n\nlet app = await flow.get(\"webApp\");\nlet Helper = await context.get('Helper');\n\nconst processRequest = async function (__req, __res) {\n    let findData = await flow.get(\"findData\");\n    let time = Date.now()\n    node.status({fill:\"red\",shape:\"ring\",text:\"message\\nsadsad\"});\n    console.log(\"start get\", __req.path)\n    try {\n        if (__req.path === \"/\") {\n            Object.defineProperties(__req, {\n                path: { value: \"/index\", writable: true, enumerable: true, configurable: true },\n            });\n        };\n        __res.set({ 'Content-Type': Helper.getMime(url.parse(__req.url, true)) })\n        __req.hostname = \"localhost\";\n        await findData({ __req, __res, level: 1, hostname: \"localhost\", path: __req.path });\n    } catch (err) {\n        console.log(err.message)\n        __res.send(err.message);\n    }\n    // __res.send('dsfsdf');\n    // __res.end()\n    console.log(\"end get\", __req.path, Date.now() - time)\n}\napp.get(\"/\", processRequest);\napp.get(\"/*splat\", processRequest)\n\nnode.status({\n    shape: \"ring\",\n    text: \"Running\"\n})\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "const Helper = {\n    types: {\n        \"3gp\": \"video/3gpp\"\n        , \"a\": \"application/octet-stream\"\n        , \"ai\": \"application/postscript\"\n        , \"aif\": \"audio/x-aiff\"\n        , \"aiff\": \"audio/x-aiff\"\n        , \"asc\": \"application/pgp-signature\"\n        , \"asf\": \"video/x-ms-asf\"\n        , \"asm\": \"text/x-asm\"\n        , \"asx\": \"video/x-ms-asf\"\n        , \"atom\": \"application/atom+xml\"\n        , \"au\": \"audio/basic\"\n        , \"avi\": \"video/x-msvideo\"\n        , \"bat\": \"application/x-msdownload\"\n        , \"bin\": \"application/octet-stream\"\n        , \"bmp\": \"image/bmp\"\n        , \"bz2\": \"application/x-bzip2\"\n        , \"c\": \"text/x-c\"\n        , \"cab\": \"application/vnd.ms-cab-compressed\"\n        , \"cc\": \"text/x-c\"\n        , \"chm\": \"application/vnd.ms-htmlhelp\"\n        , \"class\": \"application/octet-stream\"\n        , \"com\": \"application/x-msdownload\"\n        , \"conf\": \"text/plain\"\n        , \"cpp\": \"text/x-c\"\n        , \"crt\": \"application/x-x509-ca-cert\"\n        , \"css\": \"text/css\"\n        , \"csv\": \"text/csv\"\n        , \"cxx\": \"text/x-c\"\n        , \"deb\": \"application/x-debian-package\"\n        , \"der\": \"application/x-x509-ca-cert\"\n        , \"diff\": \"text/x-diff\"\n        , \"djv\": \"image/vnd.djvu\"\n        , \"djvu\": \"image/vnd.djvu\"\n        , \"dll\": \"application/x-msdownload\"\n        , \"dmg\": \"application/octet-stream\"\n        , \"doc\": \"application/msword\"\n        , \"dot\": \"application/msword\"\n        , \"dtd\": \"application/xml-dtd\"\n        , \"dvi\": \"application/x-dvi\"\n        , \"ear\": \"application/java-archive\"\n        , \"eml\": \"message/rfc822\"\n        , \"eps\": \"application/postscript\"\n        , \"exe\": \"application/x-msdownload\"\n        , \"f\": \"text/x-fortran\"\n        , \"f77\": \"text/x-fortran\"\n        , \"f90\": \"text/x-fortran\"\n        , \"flv\": \"video/x-flv\"\n        , \"for\": \"text/x-fortran\"\n        , \"gem\": \"application/octet-stream\"\n        , \"gemspec\": \"text/x-script.ruby\"\n        , \"gif\": \"image/gif\"\n        , \"gz\": \"application/x-gzip\"\n        , \"h\": \"text/x-c\"\n        , \"hh\": \"text/x-c\"\n        , \"htm\": \"text/html\"\n        , \"html\": \"text/html\"\n        , \"ico\": \"image/vnd.microsoft.icon\"\n        , \"ics\": \"text/calendar\"\n        , \"ifb\": \"text/calendar\"\n        , \"iso\": \"application/octet-stream\"\n        , \"jar\": \"application/java-archive\"\n        , \"java\": \"text/x-java-source\"\n        , \"jnlp\": \"application/x-java-jnlp-file\"\n        , \"jpeg\": \"image/jpeg\"\n        , \"jpg\": \"image/jpeg\"\n        , \"js\": \"application/javascript\"\n        , \"json\": \"application/json\"\n        , \"log\": \"text/plain\"\n        , \"m3u\": \"audio/x-mpegurl\"\n        , \"m4v\": \"video/mp4\"\n        , \"man\": \"text/troff\"\n        , \"mathml\": \"application/mathml+xml\"\n        , \"mbox\": \"application/mbox\"\n        , \"mdoc\": \"text/troff\"\n        , \"me\": \"text/troff\"\n        , \"mid\": \"audio/midi\"\n        , \"midi\": \"audio/midi\"\n        , \"mime\": \"message/rfc822\"\n        , \"mml\": \"application/mathml+xml\"\n        , \"mng\": \"video/x-mng\"\n        , \"mov\": \"video/quicktime\"\n        , \"mp3\": \"audio/mpeg\"\n        , \"mp4\": \"video/mp4\"\n        , \"mp4v\": \"video/mp4\"\n        , \"mpeg\": \"video/mpeg\"\n        , \"mpg\": \"video/mpeg\"\n        , \"ms\": \"text/troff\"\n        , \"msi\": \"application/x-msdownload\"\n        , \"odp\": \"application/vnd.oasis.opendocument.presentation\"\n        , \"ods\": \"application/vnd.oasis.opendocument.spreadsheet\"\n        , \"odt\": \"application/vnd.oasis.opendocument.text\"\n        , \"ogg\": \"application/ogg\"\n        , \"ogv\": \"video/ogg\"\n        , \"p\": \"text/x-pascal\"\n        , \"pas\": \"text/x-pascal\"\n        , \"pbm\": \"image/x-portable-bitmap\"\n        , \"pdf\": \"application/pdf\"\n        , \"pem\": \"application/x-x509-ca-cert\"\n        , \"pgm\": \"image/x-portable-graymap\"\n        , \"pgp\": \"application/pgp-encrypted\"\n        , \"pkg\": \"application/octet-stream\"\n        , \"pl\": \"text/x-script.perl\"\n        , \"pm\": \"text/x-script.perl-module\"\n        , \"png\": \"image/png\"\n        , \"pnm\": \"image/x-portable-anymap\"\n        , \"ppm\": \"image/x-portable-pixmap\"\n        , \"pps\": \"application/vnd.ms-powerpoint\"\n        , \"ppt\": \"application/vnd.ms-powerpoint\"\n        , \"ps\": \"application/postscript\"\n        , \"psd\": \"image/vnd.adobe.photoshop\"\n        , \"py\": \"text/x-script.python\"\n        , \"qt\": \"video/quicktime\"\n        , \"ra\": \"audio/x-pn-realaudio\"\n        , \"rake\": \"text/x-script.ruby\"\n        , \"ram\": \"audio/x-pn-realaudio\"\n        , \"rar\": \"application/x-rar-compressed\"\n        , \"rb\": \"text/x-script.ruby\"\n        , \"rdf\": \"application/rdf+xml\"\n        , \"roff\": \"text/troff\"\n        , \"rpm\": \"application/x-redhat-package-manager\"\n        , \"rss\": \"application/rss+xml\"\n        , \"rtf\": \"application/rtf\"\n        , \"ru\": \"text/x-script.ruby\"\n        , \"s\": \"text/x-asm\"\n        , \"sgm\": \"text/sgml\"\n        , \"sgml\": \"text/sgml\"\n        , \"sh\": \"application/x-sh\"\n        , \"sig\": \"application/pgp-signature\"\n        , \"snd\": \"audio/basic\"\n        , \"so\": \"application/octet-stream\"\n        , \"svg\": \"image/svg+xml\"\n        , \"svgz\": \"image/svg+xml\"\n        , \"swf\": \"application/x-shockwave-flash\"\n        , \"t\": \"text/troff\"\n        , \"tar\": \"application/x-tar\"\n        , \"tbz\": \"application/x-bzip-compressed-tar\"\n        , \"tcl\": \"application/x-tcl\"\n        , \"tex\": \"application/x-tex\"\n        , \"texi\": \"application/x-texinfo\"\n        , \"texinfo\": \"application/x-texinfo\"\n        , \"text\": \"text/plain\"\n        , \"tif\": \"image/tiff\"\n        , \"tiff\": \"image/tiff\"\n        , \"torrent\": \"application/x-bittorrent\"\n        , \"tr\": \"text/troff\"\n        , \"txt\": \"text/plain\"\n        , \"vcf\": \"text/x-vcard\"\n        , \"vcs\": \"text/x-vcalendar\"\n        , \"vrml\": \"model/vrml\"\n        , \"war\": \"application/java-archive\"\n        , \"wav\": \"audio/x-wav\"\n        , \"webm\": \"video/webm\"\n        , \"wma\": \"audio/x-ms-wma\"\n        , \"wmv\": \"video/x-ms-wmv\"\n        , \"wmx\": \"video/x-ms-wmx\"\n        , \"wrl\": \"model/vrml\"\n        , \"wsdl\": \"application/wsdl+xml\"\n        , \"xbm\": \"image/x-xbitmap\"\n        , \"xhtml\": \"application/xhtml+xml\"\n        , \"xls\": \"application/vnd.ms-excel\"\n        , \"xml\": \"application/xml\"\n        , \"xpm\": \"image/x-xpixmap\"\n        , \"xsl\": \"application/xml\"\n        , \"xslt\": \"application/xslt+xml\"\n        , \"yaml\": \"text/yaml\"\n        , \"yml\": \"text/yaml\"\n        , \"zip\": \"application/zip\"\n    },\n\n    getMime: function (u) {\n\n        var ext = this.getExt(u.pathname).replace('.', '');\n\n        return this.types[ext.toLowerCase()] || 'text/html';\n\n    },\n\n    getExt: function (path) {\n        var i = path.lastIndexOf('.');\n\n        return (i < 0) ? '' : path.substr(i);\n    }\n\n};\n\ncontext.set('Helper', Helper);\nreturn",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "url",
+                "module": "url"
+            }
+        ],
+        "x": 1160,
+        "y": 1180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "59223b21f2cd84a7",
+        "type": "inject",
+        "z": "2e0a33d53a902e50",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 110,
+        "y": 680,
+        "wires": [
+            [
+                "fd7d83e93d9d4fc0",
+                "c773bf745b18ea12",
+                "50be8298a2bea490",
+                "5cca2938ac195e8e",
+                "9fe7b9f49e0c7242",
+                "4d0ecc53c406f7e7",
+                "a67f7fae5c364b84"
+            ]
+        ]
+    },
+    {
+        "id": "0a64b4600dc5034f",
+        "type": "function",
+        "z": "2e0a33d53a902e50",
+        "name": "findData",
+        "func": "\nawait context.get(\"init\")()\nnode.status({ fill: \"red\", shape: \"ring\", text: \"Running\" });\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "const { createReadStream, existsSync } = fs;\nconst { readFile, writeFile, mkdir, rm, stat } = fsPromises;\nconst { createGzip } = zlib;\n\nconst maxLevel = 5;\n\nconst init = async () => {\n  var graphQlClientContainer = flow.get(\"graphQlClientContainer\");\n  var generateEjs = flow.get(\"generateEjs\");\n  var dependenciesObject = flow.get(\"dependenciesObject\");\n  var generateHtml = flow.get(\"generateHtml\")\n\n  var graphQl = new graphQlClientContainer({\n    base_url: env.get(\"GRAPHQL_URL\")\n  })\n  var dirname = (t) => t;\n  const fetchData = async (params) => {\n    let { __req, __res, hostname, path, level } = params;\n    let time = Date.now();\n    console.log(\"start path\", __req.hostname, path, Date.now() - time);\n    let full_path = `./static/${hostname}${path}`;\n    if (true || (!existsSync(full_path) && !existsSync(`${full_path}.ejs`))) {\n      try {\n          let { errors, data: _data } = await new Promise((resolve, reject) => {\n            graphQl.socket(\"app\", soc => {\n              soc.query(\n                `\n                    query List_q4b5b1ml4mu5k5sqqlv9yf3i($where: Modelq4b5b1ml4mu5k5sqqlv9yf3iWhereInput) {\n                      web_map:list_q4b5b1ml4mu5k5sqqlv9yf3i(where: $where) {\n                        id\n                        bucket:list_wktoglimpbnciem4cswrfw35 {\n                          id\n                          format:m74pxuo0nxcna8aulwz0kt9b\n                          type:ul7qo5b14uvowk5c952cufp2\n                          data:vyiwljxchjd7h228b8mj393h\n                        }\n                      }\n                    }`,\n                {\n                  \"where\": {\n                    \"list_gwtuz6s83hc28tbjjmhh7l84\": {\n                      \"list_egwyrwihsmtwir2fcin633r6\": {\n                        \"oj8syp8p47eoa7bmmvqa5mw4\": {\n                          \"hasKey\": hostname || __req.hostname\n                        }\n                      }\n                    },\n                    \"list_gfksgqxqqf5v1r9xwnx2mx0t\": {\n                      \"list_aobcevtk024vownl3ekhmg6u\": {\n                        \"kycp2g09n2qp6k4mxxnzlj3k\": {\n                          \"hasKey\": path\n                        }\n                      }\n                    }\n                  }\n                }, (res) => {\n                  resolve(res)\n                })\n            })\n          })\n          if (!errors && _data?.web_map?.[0]?.bucket?.[0]) {\n            let { data, type, format } = _data?.web_map?.[0]?.bucket?.[0];\n            let basepath = full_path.split(\"/\").slice(0, -1).join(\"/\")\n            if (!existsSync(dirname(basepath))) { await mkdir(dirname(basepath), { recursive: true }) };\n            // if ( type === \"text/ejs\") {\n            //   const dom = new JSDOM(data, { pretendToBeVisual: true });\n            //   const document = dom.window.document;\n            //   if ( document.querySelector('html')) {\n            //     document.querySelector('html').setAttribute(\"lang\", \"vi\");\n            //   };\n\n            //   // data = dom.serialize();\n            //   data = document.documentElement.outerHTML;\n            // }\n            await writeFile((type === \"text/ejs\" && level == 1) ? `${full_path}.ejs` : full_path, Buffer.from((type == \"text/ejs\") ? data : data, format));\n            console.log(\"end path\", hostname, path, Date.now() - time)\n            return\n          } else {\n            return { type: \"404\", data: \"404 - Not found file!\", format: \"utf8\" };\n          }\n      } catch (err) {\n        console.error(err)\n        return { type: \"404\", data: \"404 - cannot access database!\", format: \"utf8\" };\n      }\n    }\n  }\n\n  const findData = async ( params ) => {\n    try {\n      let { __req, __res, hostname, path, level } = params;\n      let full_path = `./static/${hostname}${path}`;\n      console.log(full_path);\n      if (__req.headers[\"cache-control\"] === \"no-cache\" || (!existsSync(full_path) && !existsSync(`${full_path}.ejs`))) {\n        let res = await fetchData(params);\n        if (res) { __res.status(404).send(res.data || '404 - Not found file!'); return;}\n      };\n      console.log(\"fullpathinfirst\",existsSync(full_path), full_path, __req.headers['cache-conrol'])\n      if (existsSync(full_path)) {\n        __res.status(200);\n        __res.set({ 'Content-Encoding': 'gzip' });\n        createReadStream(full_path).pipe(createGzip()).pipe(__res);\n        // createReadStream(full_path).pipe(__res);\n      } else if ( __req.headers[\"cache-control\"] !== \"no-cache\" && existsSync(full_path + \".html\")) {\n        __res.status(200);\n        __res.set({ 'Content-Encoding': 'gzip' });\n        createReadStream(full_path+\".html\").pipe(createGzip()).pipe(__res);\n      } else if (existsSync(`${full_path}.ejs`)) {\n        __res.status(200);\n        let html = await generateEjs(`${full_path}.ejs`, params, __req.headers[\"cache-control\"] !== \"no-cache\");\n        dependenciesObject[full_path] = dependenciesObject[full_path]?.add(`${full_path}.ejs`) || new Set([`${full_path}.ejs`])\n        if ( html.startsWith(\"file:\")) {\n          if ( level > maxLevel) { __res.send(`Catch limit max level inside; ${ maxLevel }`)} else {\n            let target_split = html.slice(5).split(\"/\");\n            let hostname = target_split.shift();\n            let path = [\"\", ...target_split].join(\"/\");\n            level ++;\n            await findData({ ...params, hostname, path, level});\n            return;\n          };\n        } else {\n          html = await generateHtml(html, params)\n          writeFile( full_path + \".html\", html, \"utf8\");\n          dependenciesObject[full_path + \".ejs\"] = dependenciesObject[`${full_path}.ejs`]?.add(`${full_path}.html`) || new Set([`${full_path}.html`])\n          __res.set({ 'Content-Type': 'text/html'})\n          __res.send(html);\n          __res.end();\n        }\n      } else {\n        __res.status(404).send('404 - Not found file!');\n      };\n    } catch (err) {\n      console.log(err)\n    }\n    };\n\n  flow.set(\"findData\", findData);\n  flow.set(\"fetchData\", fetchData);\n}\n\ncontext.set(\"init\", init)\n\nnode.send({})",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "fsPromises",
+                "module": "fs/promises"
+            },
+            {
+                "var": "fs",
+                "module": "fs"
+            },
+            {
+                "var": "zlib",
+                "module": "zlib"
+            }
+        ],
+        "x": 420,
+        "y": 800,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "5cca2938ac195e8e",
+        "type": "function",
+        "z": "2e0a33d53a902e50",
+        "name": "socketClient",
+        "func": "\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "const { createId } = paralleldriveCuid2;\nconst  EventEmitter = events;\n// import axios from \"axios\";\nconst { applyPatch } = rfc6902;\nconst { io } = socketIoClient;\n\n// Begin graphql Client\n\nclass graphQlClient {\n    constructor(args = {}) {\n        const { url } = args;\n        this.socketMap = new Map([]);\n        this.useSocket = false;\n        this.cacheQueringMap = new Map();\n        this.cacheQueriedMap = new Map();\n        this.cacheWait = new Map();\n        this.log = (data) => {\n            console.log(data);\n        };\n        this.emitter = new EventEmitter();\n        this.socket = null;\n        if (url) {\n            this.connect.bind(this, url)();\n        }\n        this.emitter.setMaxListeners(0);\n    }\n\n    async connect(url, configs = {}) {\n        configs = Object.assign({\n            useSocket: true, alias: null\n        }, configs)\n        this.socket = await io(url, {\n            // transports: [\"websocket\"],\n            // withCredentials: true,\n            reconnection: true,\n            reconnectionDelay: 1000,\n            reconnectionDelayMax: 5000,\n            reconnectionAttempts: 99999\n        });\n\n        let createReconnect = async () => {\n            let loopReconnect = setInterval(() => {\n                console.log(\"Reconnect A: \", url)\n                this.socket.connect()\n            }, 1000);\n            this.emitter.once(\"connected\", () => clearInterval(loopReconnect))\n        }\n\n        createReconnect()\n\n        this.socket.on(\"error\", (error) => console.error(error));\n        this.socket.on(\"connect\", () => {\n            console.log(\"Socket is connect: \", this.socket.id, url);\n            this.emitter.emit(\"connect\", true);\n            this.emitter.emit(\"connected\", true);\n        });\n\n        this.socket.on(\"reconnect\", ({ id, data }) => {\n            console.log(\"Reconnect to: \", this.socket.id)\n        });\n\n        this.socket.on(\"data\", (data, ack) => {\n            let { id, type, payload } = data;\n            this.emitter.emit(id, { type, payload });\n            if (typeof ack == \"function\") ack();\n        });\n\n        this.socket.on(\"disconnect\", (reason) => {\n            console.log(\"Disconnected: \", reason)\n            createReconnect()\n            if ([\"transport close\", \"io server disconnect\"].includes(reason)) {\n                // the disconnection was initiated by the server, you need to reconnect manually\n            }\n            // else the socket will automatically try to reconnect\n        });\n    };\n\n    async sendData(data) {\n        if (this.socket?.connected) {\n            this.socket.emit(\"data\", data)\n        } else {\n            this.emitter.once(\"connect\", () => {\n                this.socket.emit(\"data\", data)\n            })\n        }\n    }\n\n    async query(query, variables = {}, callback = (res) => { }) {\n        if (typeof query === 'object') {\n            variables = query.variables;\n            callback = query.callback || callback;\n            query = query.query;\n        }\n        let id = createId();\n        let payload = JSON.stringify({ query, variables });\n        this.sendData({ payload, id, type: \"query\" });\n        let res_data = await new Promise((resolve) => {\n            this.emitter.once(id, ({ type, payload }) => {\n                resolve(payload)\n            })\n        });\n        try {\n            await callback(res_data);\n        } catch (err) {\n            await callback({ errors: true, data: err })\n        }\n        return res_data\n\n    }\n\n    async watch(query, variables, callback = (res) => { }, configs = {}) {\n        let [id] = [createId()];\n        let full_patch = {};\n        setTimeout(() => {\n            this.sendData({ payload: { query, variables }, id, type: \"start\" });\n        }, configs?.delay || 0)\n        this.emitter.on(id, ({ type, payload }) => {\n            console.log(type, \"typ\")\n            if (type == \"patch\") {\n                applyPatch(full_patch, payload)\n                callback(full_patch);\n            } else if ([\"error\", \"data\"].includes(type)) {\n                full_patch = payload\n                callback(full_patch);\n            }\n            // console.log(id, full_patch)\n            if (![\"patch\", \"data\"].includes(type)) {\n                this.emitter.removeAllListeners(id);\n            }\n        });\n\n        return async () => {\n            this.emitter.removeAllListeners(id);\n            this.socket.emit(\"data\", { id, type: \"stop\" });\n        };\n    }\n    async start() {\n        return this\n    }\n}\n\nclass graphQlClientContainer {\n    constructor(configs = {}) {\n        this.base_url = configs?.base_url;\n        this.socketBucket = {};\n    }\n\n    async socket(schema, func) {\n        await this.connect(schema);\n        (typeof func === \"function\") && await func(this.socketBucket[schema])\n    }\n\n    async connect(schema) {\n        if (!this.socketBucket[schema]) {\n            this.socketBucket[schema] = new graphQlClient();\n            await this.socketBucket[schema].connect(`${this.base_url}/${schema}`);\n        }\n        return\n    }\n\n    async start() {\n        return this.socket\n    }\n};\n\nflow.set(\"graphQlClient\", graphQlClient);\nflow.set(\"graphQlClientContainer\", graphQlClientContainer);\nnode.send({\n    graphQlClient,\n    graphQlClientContainer\n});\nreturn null",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "socketIoClient",
+                "module": "socket.io-client"
+            },
+            {
+                "var": "rfc6902",
+                "module": "rfc6902"
+            },
+            {
+                "var": "events",
+                "module": "events"
+            },
+            {
+                "var": "paralleldriveCuid2",
+                "module": "@paralleldrive/cuid2"
+            }
+        ],
+        "x": 430,
+        "y": 540,
+        "wires": [
+            [
+                "eaac7c6a7edab71d"
+            ]
+        ]
+    },
+    {
+        "id": "c773bf745b18ea12",
+        "type": "function",
+        "z": "2e0a33d53a902e50",
+        "name": "generateEjs",
+        "func": "\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "const { createReadStream, existsSync } = fs;\nconst { readFile, writeFile, mkdir, rm, stat } = fsPromises;\nconst { JSDOM } = jsdom;\n\nconst maxLevel = 9;\n\nconst generateEjs = async (pathFile, params, cache = true) =>  {\n  let fetchData = flow.get(\"fetchData\")\n  let dependenciesObject = flow.get(\"dependenciesObject\")\n  let { level } = params;\n  console.log(new Date(), pathFile)\n  console.log(\"target\", level, params.hostname, params.path)\n  try {\n    // console.log(this.maxLevel, level, params)\n    if (level >= maxLevel) {\n      return `Catch limit max Level inside: ${maxLevel}`;\n    } else {\n      if ((!cache || !existsSync(pathFile)) && level > 1) {\n        let res = await fetchData({ ...params });\n        if (res) { return res }\n      };\n      if (existsSync(pathFile)) {\n        let _data = await ejs.compile(await readFile(pathFile, { encoding: 'utf8' }), { client: true, async: true, cache: cache, filename: pathFile, rmWhitespace: false })({ ...params, level, axios }, null, async (target, d) => {\n          if (target.startsWith(\"file:\")) {\n            return target\n          };\n          let target_split = target.split(\"/\");\n          let hostname = target_split.shift() || params.hostname;\n          let path = [\"\", ...target_split].join(\"/\");\n          console.log(\"target\", level, hostname, path);\n          dependenciesObject[`./static/${hostname}${path}`] = dependenciesObject[`./static/${hostname}${path}`]?.add(pathFile) || new Set([pathFile])\n          return await generateEjs(`./static/${hostname}${path}`, Object.assign({}, params, d, { path, hostname, level: level + 1, axios }), cache);\n        });\n        return _data;\n      } else {\n        return '404 - Not found file!'\n      }\n    }\n  } catch (err) { \n    node.status({fill:\"red\",shape:\"ring\",text: err.message });\n    console.log(err.message)\n    return err.message \n  }\n};\n\nconst generateHtml = async (html, params) => {\n  let { __req, __res, hostname, path, level } = params;\n  const dom = new JSDOM(html);\n  const document = dom.window.document;\n  if (document.querySelector('html')) {\n    document.querySelector('html').setAttribute(\"lang\", \"vi\");\n    document.querySelector('html').removeAttribute(\"version\");\n    if (!document.doctype) {\n      const doctypeNode = document.implementation.createDocumentType('html', '', '');\n      // Insert the DOCTYPE node at the beginning of the document\n      document.insertBefore(doctypeNode, document.documentElement);\n    }\n  };\n  // await Promise.all( [...document.querySelectorAll(\"script\")].map( async (node, index) => {\n  //   if ( node.src.includes(\"render\")) {\n  //     document.remo\n  //   }\n  //   console.log(node)\n  //   node.setAttribute(\"async\", false);\n  //   node.setAttribute(\"defer\", true);\n  // }))\n  await Promise.all([...document.querySelectorAll(\"img:not([alt])\")].map(async (node, index) => {\n    node.setAttribute(\"alt\", \"\");\n  }))\n  if (document.querySelector(\"head > script\")) {\n    document.querySelector(\"head > script\").textContent = `window.ladi_viewport=function(b){var a=document;b=b?b:'innerWidth';var c=window[b];var d=c<768;if(typeof window.ladi_is_desktop==\"undefined\"||window.ladi_is_desktop==undefined){window.ladi_is_desktop=!d;}var e=960;var f=420;var g='';if(!d){g=\"width=\"+e+\",user-scalable=no,initial-scale=1.0\";}else{var h=1;var i=f;if(i!=c){h=c / i;}g=\"width=\"+i+\",user-scalable=no,initial-scale=\"+h+\",minimum-scale=\"+h+\",maximum-scale=\"+h;}var j=a.getElementById(\"viewport\");if(!j){j=a.createElement(\"meta\");j.id=\"viewport\";j.name=\"viewport\";a.head.appendChild(j);}j.setAttribute(\"content\",g);};window.ladi_viewport();window.ladi_fbq_data = [];window.ladi_fbq = function () {window.ladi_fbq_data.push(arguments);};window.ladi_ttq_data = [];window.ladi_ttq = function () {window.ladi_ttq_data.push(arguments);};`;\n  };\n  if (document.querySelector(\"head > link[rel='canonical']\")) {\n    document.querySelector(\"head > link[rel='canonical']\").setAttribute(\"href\", `https://${__req.hostname}${__req.path}`)\n  };\n  if (document.querySelector(\"head > meta[property='og:url']\")) {\n    document.querySelector(\"head > meta[property='og:url']\").setAttribute(\"content\", `https://${__req.hostname}${__req.path}`)\n  };\n\n  html = dom.serialize();\n  return html\n}\n\nflow.set(\"generateEjs\", generateEjs)\n\nflow.set(\"generateHtml\", generateHtml);\nnode.send({})",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "fsPromises",
+                "module": "fs/promises"
+            },
+            {
+                "var": "fs",
+                "module": "fs"
+            },
+            {
+                "var": "ejs",
+                "module": "ejs"
+            },
+            {
+                "var": "axios",
+                "module": "axios"
+            },
+            {
+                "var": "jsdom",
+                "module": "jsdom"
+            }
+        ],
+        "x": 430,
+        "y": 700,
+        "wires": [
+            [
+                "eaac7c6a7edab71d"
+            ]
+        ]
+    },
+    {
+        "id": "50be8298a2bea490",
+        "type": "function",
+        "z": "2e0a33d53a902e50",
+        "name": "dependenciesObject",
+        "func": "\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "var dependenciesObject = {};\nflow.set(\"dependenciesObject\", dependenciesObject)\nnode.send({})",
+        "finalize": "",
+        "libs": [],
+        "x": 460,
+        "y": 620,
+        "wires": [
+            [
+                "eaac7c6a7edab71d"
+            ]
+        ]
+    },
+    {
+        "id": "eaac7c6a7edab71d",
+        "type": "join",
+        "z": "2e0a33d53a902e50",
+        "name": "",
+        "mode": "custom",
+        "build": "array",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "useparts": false,
+        "accumulate": false,
+        "timeout": "",
+        "count": "3",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 710,
+        "y": 620,
+        "wires": [
+            [
+                "0a64b4600dc5034f"
+            ]
+        ]
+    },
+    {
+        "id": "37e97c0c3908f8e0",
+        "type": "function",
+        "z": "2e0a33d53a902e50",
+        "name": "Start HTTP",
+        "func": " \nvar emitter = new events.EventEmitter();\nemitter.setMaxListeners(0);\n\nlet returnQueue = 'http-response-' + paralleldriveCuid2.createId();\n\nconst app = flow.get(\"webApp\");\n\nvar addJob = await global.get(\"getQueue\")(\"query\"); \nawait node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Starting at: \" + new Date()\n    });\n\nconst processRequest = async function (req, res) {\n    let requestId = paralleldriveCuid2.createId();\n    await node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Processing at: \" + new Date() + \" \" + requestId\n    });\n    emitter.once(requestId, ({ type, payload }) => {\n        res.type('application/json');\n        switch (type) {\n            case 'data':\n                res.status(200)\n                res.send(payload)\n                break;\n            case 'error':\n                res.status(400)\n                res.send(payload)\n                break;\n        }\n        res.end();\n    });\n    addJob(requestId, {\n        id: requestId,\n        schema: req?.params?.schema,\n        payload: req.body,\n        context: { \n            headers: req.headers,\n            id: requestId,\n            replyTo: returnQueue\n         }\n    }, { jobId: requestId })\n};\n\napp.post(\"/:schema\", processRequest);\napp.post(\"/graphql/:schema\", processRequest);\n\nglobal.get(\"setWorker\")(returnQueue, async ( returnJob ) => {\n    emitter.emit( returnJob.name, returnJob.data );\n    return null\n}, { concurrency: 100 })\n\nawait node.status({\n    fill: \"green\",\n    shape: \"ring\",\n    text: \"Running at: \" + new Date()\n});\n\nnode.send({ payload: {}})",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "paralleldriveCuid2",
+                "module": "@paralleldrive/cuid2"
+            },
+            {
+                "var": "events",
+                "module": "events"
+            }
+        ],
+        "x": 630,
+        "y": 1120,
+        "wires": [
+            [
+                "0e052e27ca0d9560"
+            ]
+        ]
+    },
+    {
+        "id": "a67f7fae5c364b84",
+        "type": "function",
+        "z": "2e0a33d53a902e50",
+        "name": "Start Emitter",
+        "func": "( async () => {\n    await node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Starting\"\n    })\n    var emitter = new events.EventEmitter();\n    emitter.setMaxListeners(0);\n    await flow.set(\"emitter\", emitter);\n    await node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Running\"\n    });\n    node.send({})\n})()\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "events",
+                "module": "events"
+            }
+        ],
+        "x": 430,
+        "y": 340,
+        "wires": [
+            [
+                "eaac7c6a7edab71d"
+            ]
+        ],
+        "icon": "node-red/arrow-in.svg"
+    },
+    {
+        "id": "9fe7b9f49e0c7242",
+        "type": "subflow:5ed478d1a62e4007",
+        "z": "2e0a33d53a902e50",
+        "name": "",
+        "x": 450,
+        "y": 460,
+        "wires": [
+            [
+                "eaac7c6a7edab71d"
+            ]
+        ]
+    },
+    {
+        "id": "4d0ecc53c406f7e7",
+        "type": "subflow:1e273549eda8541e",
+        "z": "2e0a33d53a902e50",
+        "name": "",
+        "env": [
+            {
+                "name": "REDIS_CONNECTION",
+                "value": "REDIS_CONNECTION",
+                "type": "env"
+            }
+        ],
+        "x": 450,
+        "y": 400,
+        "wires": [
+            [
+                "eaac7c6a7edab71d"
+            ]
+        ]
+    },
+    {
+        "id": "bde4a9bdb9061a3b",
+        "type": "function",
+        "z": "2e0a33d53a902e50",
+        "name": "Start Upload",
+        "func": "const {\n  S3Client,\n  PutObjectCommand,\n} = awsSdkClientS3;\n\nconst { Upload } = awsSdkLibStorage;\n\n// File sẽ được lưu tạm thời dưới dạng Buffer trong RAM (req.file.buffer)\nconst storage = multer.memoryStorage();\nconst upload = multer({\n  storage: storage,\n  // Cảnh báo: Thiết lập giới hạn file lớn để kiểm tra Multipart Upload\n  limits: { fileSize: 5000 * 1024 * 1024 } // Ví dụ: giới hạn 50MB\n});\n\nconst ACCOUNT_ID = \"cabeebbd339be94fb532e563a50ffd18\";\nconst ACCESS_KEY_ID = \"6fb7e17a9d03336755e649f2af7feaa6\";\nconst SECRET_ACCESS_KEY = \"797ef419d1d6ecb177cd968c4ce74dcecfaf5af67bd98cc8aac61fd442d84e2c\";\nconst BUCKET_NAME = 'dudu-bucket';\n\nconst S3 = new S3Client({\n  region: \"auto\",\n  endpoint: `https://${ACCOUNT_ID}.r2.cloudflarestorage.com`,\n  credentials: {\n    accessKeyId: ACCESS_KEY_ID,\n    secretAccessKey: SECRET_ACCESS_KEY,\n  },\n});\n\nconst Formidable = formidable;\n\nvar emitter = new events.EventEmitter();\nemitter.setMaxListeners(0);\n\nlet returnQueue = 'http-response-' + paralleldriveCuid2.createId();\n\nconst app = flow.get(\"webApp\");\n\nvar addJob = await global.get(\"getQueue\")(\"query\"); \nawait node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Starting at: \" + new Date()\n    });\n\nfunction shouldUseBase64(mimeType) {\n  const binaryMimeRegex = /^(audio|video|image|application\\/(pdf|zip|rar|tar|gzip|bzip2|octet-stream|msword|vnd\\.openxmlformats-officedocument))/i;\n  return binaryMimeRegex.test(mimeType);\n}\n\nconst processUpload = async function (req, res) {\n    let requestId = paralleldriveCuid2.createId();\n    \n    try {\n      if (!req.file) {\n        return res.status(400).send('No file uploaded.');\n      }\n\n      const file = req.file;\n      // Sử dụng tên file gốc (file.originalname) với UUID để đảm bảo tính duy nhất\n      const fileKey = `${requestId}-${file.originalname}`;\n\n      // Khởi tạo Upload với S3Client và các tham số\n      const parallelUploads = new Upload({\n        client: S3,\n        params: {\n          Bucket: BUCKET_NAME,\n          Key: fileKey,\n          Body: file.buffer,\n          // ContentType lấy tự động từ Multer (VD: application/pdf, video/mp4)\n          ContentType: file.mimetype,\n          ACL: 'public-read'\n        },\n        // Cấu hình cho Multipart Upload \n        queueSize: 4,\n        partSize: 5 * 1024 * 1024,\n      });\n\n      // Chờ quá trình upload hoàn tất\n      const data = await parallelUploads.done();\n\n      res.status(200).json({\n        message: `Tệp (${file.mimetype}) đã được upload thành công!`,\n        url: data.Location,\n        size: file.size,\n      });\n    } catch (error) {\n      console.error('Lỗi khi upload tệp:', error);\n      res.status(500).send('Lỗi khi upload tệp lên S3: ' + error.message);\n    }\n\n    await node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Processing at: \" + new Date() + \" \" + requestId\n    });\n    emitter.once(requestId, ({ type, payload }) => {\n        res.type('application/json');\n        switch (type) {\n            case 'data':\n                res.status(200)\n                res.send(payload)\n                break;\n            case 'error':\n                res.status(400)\n                res.send(payload)\n                break;\n        }\n        res.end();\n    });\n    addJob(requestId, {\n        id: requestId,\n        schema: req?.params?.schema,\n        payload: req.body,\n        context: { \n            headers: req.headers,\n            id: requestId,\n            replyTo: returnQueue\n         }\n    }, { jobId: requestId })\n};\n\napp.post(\"/api/upload\", upload.single('file'), processUpload);\n\nglobal.get(\"setWorker\")(returnQueue, async ( returnJob ) => {\n    emitter.emit( returnJob.name, returnJob.data );\n    return null\n}, { concurrency: 100 })\n\nawait node.status({\n    fill: \"green\",\n    shape: \"ring\",\n    text: \"Running at: \" + new Date()\n});\n\nnode.send({ payload: {}})",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "paralleldriveCuid2",
+                "module": "@paralleldrive/cuid2"
+            },
+            {
+                "var": "events",
+                "module": "events"
+            },
+            {
+                "var": "formidable",
+                "module": "formidable"
+            },
+            {
+                "var": "awsSdkClientS3",
+                "module": "@aws-sdk/client-s3"
+            },
+            {
+                "var": "multer",
+                "module": "multer"
+            },
+            {
+                "var": "awsSdkLibStorage",
+                "module": "@aws-sdk/lib-storage"
+            }
+        ],
+        "x": 630,
+        "y": 1220,
+        "wires": [
+            [
+                "0e052e27ca0d9560"
+            ]
+        ]
+    },
+    {
+        "id": "cf1144606b63a99f",
+        "type": "function",
+        "z": "2e0a33d53a902e50",
+        "name": "Server File",
+        "func": "const {\n  S3Client,\n  GetObjectCommand,\n  HeadObjectCommand\n} = awsSdkClientS3;\nconst { Readable } = stream;\n\nconst { getSignedUrl } = awsSdkS3RequestPresigner;\n\nconst ACCOUNT_ID = \"cabeebbd339be94fb532e563a50ffd18\";\nconst ACCESS_KEY_ID = \"6fb7e17a9d03336755e649f2af7feaa6\";\nconst SECRET_ACCESS_KEY = \"797ef419d1d6ecb177cd968c4ce74dcecfaf5af67bd98cc8aac61fd442d84e2c\";\nconst BUCKET_NAME = 'dudu-bucket';\n\n// Định nghĩa giới hạn kích thước (byte)\nconst MAX_CACHE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB (Hit Cache)\nconst MAX_STREAM_SIZE_BYTES = 2 * 1024 * 1024; // 2MB (Miss Cache -> Stream & Save)\n\nconst S3 = new S3Client({\n  region: \"auto\",\n  endpoint: `https://${ACCOUNT_ID}.r2.cloudflarestorage.com`,\n  credentials: {\n    accessKeyId: ACCESS_KEY_ID,\n    secretAccessKey: SECRET_ACCESS_KEY,\n  },\n});\n\n\n\nvar emitter = new events.EventEmitter();\nemitter.setMaxListeners(0);\n\nlet returnQueue = 'http-response-' + paralleldriveCuid2.createId();\n\nconst app = flow.get(\"webApp\");\n\nvar addJob = await global.get(\"getQueue\")(\"query\"); \nawait node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Starting at: \" + new Date()\n    });\n\n// Hàm hỗ trợ đọc metadata từ file\nfunction readLocalMetadata(fileMetadataKey) {\n  if (fs.existsSync(fileMetadataKey)) {\n    const metadata = fs.readFileSync(fileMetadataKey, 'utf8');\n    return JSON.parse(metadata);\n  }\n  return null;\n}\n\n\nconst processFileStream = async function (req, res) {\n    try {\n      const fileKey = req.params.fileKey;\n      const localFilePath = `./cache/${req.hostname}/${fileKey}`;\n      const localMetaPath = `./cache/${req.hostname}/${fileKey}.json`;\n      var localMetadata = readLocalMetadata(localMetaPath);\n\n\n      // --- BƯỚC 1: CACHE MISS - LẤY METADATA TỪ S3 ---\n      if (!fs.existsSync(localFilePath)) {\n        console.log(`[MISS] Kiểm tra S3 cho file: ${fileKey}`);\n\n        let s3Meta;\n        try {\n          const headCommand = new HeadObjectCommand({ Bucket: BUCKET_NAME, Key: fileKey });\n          s3Meta = await S3.send(headCommand);\n        } catch (error) {\n          if (error.name === 'NotFound' || error.name === 'NoSuchKey') {\n            return res.status(404).send('File không tồn tại trên S3.');\n          }\n          console.error('Lỗi S3 HeadObject:', error);\n          return res.status(500).send('Lỗi khi truy vấn S3.');\n        }\n        \n        // Cấu trúc metadata cục bộ\n        localMetadata = {\n          ContentLength: s3Meta.ContentLength,\n          ContentType: s3Meta.ContentType,\n          ETag: s3Meta.ETag,\n          CachedAt: new Date().toISOString()\n        };\n      }\n\n      // --- BƯỚC 2: Tệp lớn (>2MB): REDIRECT để bảo vệ máy chủ ---\n      if (localMetadata.ContentLength > MAX_STREAM_SIZE_BYTES ) {\n        console.log(`[REDIRECT] File ${fileKey} lớn, sử dụng Signed URL.`);\n        const getObjectCommand = new GetObjectCommand({ Bucket: BUCKET_NAME, Key: fileKey });\n        const signedUrl = await getSignedUrl(S3, getObjectCommand, { expiresIn: 3600 });\n        res.redirect(signedUrl);\n        return;\n      }\n\n      // --- BƯỚC 3: Tệp nhỏ (<=2MB): STREAM VÀ LƯU CACHE ---\n      if (localMetadata.ContentLength <= MAX_STREAM_SIZE_BYTES) {\n\n        // 1. Thiết lập header cho Client\n        res.setHeader('Content-Type', localMetadata.ContentType);\n        res.setHeader('Content-Length', localMetadata.ContentLength);\n        \n        if (fs.existsSync(localFilePath)) {\n          // Stream từ local disk\n          fs.createReadStream(localFilePath).pipe(res);\n          return;\n        }\n\n        console.log(`[MISS & SAVE] File ${fileKey} nhỏ, Fetch từ S3, stream và lưu cache.`);\n        let basepath = localFilePath.split(\"/\").slice(0, -1).join(\"/\")\n        if (!fs.existsSync(basepath)) {\n          fs.mkdirSync(basepath, { recursive: true })\n        }\n\n        const getObjectCommand = new GetObjectCommand({ Bucket: BUCKET_NAME, Key: fileKey });\n        const s3Response = await S3.send(getObjectCommand);\n\n        // 2. Stream tới Client và đồng thời Stream tới Local Disk\n        if (s3Response.Body instanceof Readable) {\n          // Tạo luồng băm để tính MD5 và thay đổi nó\n          const hashStream = crypto.createHash('md5');\n          const originalMD5 = s3Response.ETag ? s3Response.ETag.replace(/\"/g, '') : 'N/A';\n          s3Response.Body\n            .on('data', chunk => {\n              // Tính MD5 gốc (Không thay đổi)\n              hashStream.update(chunk);\n            })\n            .on('error', (err) => {\n              console.error(\"Lỗi S3 Stream:\", err);\n              // Đảm bảo đóng writeStream và xóa file tạm nếu lỗi\n              writeStream.close();\n              fs.unlinkSync(localFilePath);\n            });\n\n          const writeStream = fs.createWriteStream(localFilePath);\n          s3Response.Body.pipe(res);\n          s3Response.Body.pipe(writeStream);\n\n          // Chờ quá trình ghi file hoàn tất\n          await new Promise((resolve, reject) => {\n            writeStream.on('finish', () => {\n              // *** Ghi Metadata và Thay đổi MD5 sau khi Ghi file xong ***\n\n              // Ghi Metadata\n              fs.writeFileSync(localMetaPath, JSON.stringify(localMetadata, null, 2));\n\n              // Thao tác MD5 (Tùy chọn: Thêm 1 byte rác để thay đổi MD5 cục bộ)\n              // fs.appendFileSync(localFilePath, Buffer.from([0x01]));\n\n              // const newLocalMD5 = crypto.createHash('md5').update(fs.readFileSync(localFilePath)).digest('hex');\n              // console.log(`MD5 gốc S3: ${originalMD5}, MD5 Local mới: ${newLocalMD5}`);\n\n              resolve();\n            });\n            writeStream.on('error', (err) => {\n              // Đảm bảo xóa file data và meta nếu ghi lỗi\n              fs.unlink(localFilePath, () => { });\n              fs.unlink(localMetaPath, () => { });\n              reject(err);\n            });\n          });\n        } else {\n          res.status(500).send(\"Lỗi: Không thể đọc luồng dữ liệu từ S3.\");\n        }\n      }\n        \n    } catch (err) {\n      console.log(err.message)\n    }\n}\n\nconst processFileToRedirect = async function (req, res) {\n    let requestId = paralleldriveCuid2.createId();\n  try {\n    const fileKey = req.params.fileKey;\n    node.status({fill:\"green\",shape:\"ring\",text:fileKey});\n\n    // 1. Tạo đối tượng lệnh GetObjectCommand\n    const command = new GetObjectCommand({\n      Bucket: BUCKET_NAME,\n      Key: fileKey,\n      // Thêm các Header tùy chỉnh nếu cần (ví dụ: Force download)\n      // ResponseContentDisposition: `attachment; filename=\"${fileKey}\"`, \n    });\n\n    // 2. Tạo Pre-Signed URL\n    // Tệp có thể được truy cập trong 3600 giây (1 giờ)\n    const signedUrl = await getSignedUrl(S3, command, {\n      expiresIn: 3600\n    });\n\n    console.log(`Đã tạo Signed URL cho ${fileKey}: ${signedUrl}`);\n\n    // 3. Chuyển hướng Client (Redirect)\n    // Khi client truy cập endpoint này, server sẽ chuyển hướng\n    // trình duyệt/client đến URL tạm thời trên S3 để tải tệp.\n    res.redirect(signedUrl);\n\n  } catch (error) {\n    console.error('Lỗi khi truy xuất file từ S3:', error);\n\n    // Kiểm tra lỗi NoSuchKey nếu file không tồn tại\n    if (error.name === 'NoSuchKey') {\n      return res.status(404).send('File không tồn tại trên S3.');\n    }\n\n    res.status(500).send('Lỗi máy chủ khi xử lý yêu cầu file.');\n  }\n};\n\napp.get(\"/api/assets/:fileKey\", processFileStream);\n\nglobal.get(\"setWorker\")(returnQueue, async ( returnJob ) => {\n    emitter.emit( returnJob.name, returnJob.data );\n    return null\n}, { concurrency: 100 })\n\nawait node.status({\n    fill: \"green\",\n    shape: \"ring\",\n    text: \"Running at: \" + new Date()\n});\n\nnode.send({ payload: {}})",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "const init = async () => {\n    if (!fs.existsSync('./cache')) {\n        fs.mkdirSync('./cache');\n    }\n};\n\ninit()",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "paralleldriveCuid2",
+                "module": "@paralleldrive/cuid2"
+            },
+            {
+                "var": "events",
+                "module": "events"
+            },
+            {
+                "var": "awsSdkClientS3",
+                "module": "@aws-sdk/client-s3"
+            },
+            {
+                "var": "awsSdkS3RequestPresigner",
+                "module": "@aws-sdk/s3-request-presigner"
+            },
+            {
+                "var": "fs",
+                "module": "fs"
+            },
+            {
+                "var": "crypto",
+                "module": "crypto"
+            },
+            {
+                "var": "stream",
+                "module": "stream"
+            }
+        ],
+        "x": 630,
+        "y": 1340,
+        "wires": [
+            [
+                "0e052e27ca0d9560"
+            ]
+        ]
+    },
+    {
+        "id": "0e052e27ca0d9560",
+        "type": "join",
+        "z": "2e0a33d53a902e50",
+        "name": "",
+        "mode": "custom",
+        "build": "array",
+        "property": "payload",
+        "propertyType": "msg",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "useparts": false,
+        "accumulate": false,
+        "timeout": "",
+        "count": "3",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 870,
+        "y": 1180,
+        "wires": [
+            [
+                "77eb926e9c56ae9c"
+            ]
+        ]
+    },
+    {
+        "id": "c0db84696cc1b834",
+        "type": "function",
+        "z": "a52209a7262ea19f",
+        "name": "Start Emitter",
+        "func": "( async () => {\n    await node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Starting\"\n    })\n    var emitter = new events.EventEmitter();\n    emitter.setMaxListeners(0);\n    await flow.set(\"emitter\", emitter);\n    await node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Running\"\n    });\n    node.send({})\n})()\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "events",
+                "module": "events"
+            }
+        ],
+        "x": 370,
+        "y": 80,
+        "wires": [
+            [
+                "17b13be6b823c221"
+            ]
+        ],
+        "icon": "node-red/arrow-in.svg"
+    },
+    {
+        "id": "e0be9b659f69866d",
+        "type": "function",
+        "z": "a52209a7262ea19f",
+        "name": "Start WebSerer",
+        "func": "\nawait node.status({\n    fill: \"red\",\n    shape: \"ring\",\n    text: \"Starting at: \" + new Date()\n})\nawait context.get(\"init\")()\nawait node.status({\n    fill: \"red\",\n    shape: \"ring\",\n    text: \"Running at: \" + new Date()\n});\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "const { createServer, request } = http;\n\nvar app = express();\nvar server = createServer(app);\nvar init = false;\n\nvar main = async () => {\n    app.use(cors({\n        \"origin\": \"*\",\n        \"methods\": \"GET,HEAD,PUT,PATCH,POST,DELETE\",\n        // \"preflightContinue\": false,\n        // \"optionsSuccessStatus\": 204\n    }));\n    app.use(bodyParser.json());\n\n    try {\n        server.listen(4081, '0.0.0.0', () => {\n            console.log(`GRAPHQL running in port ${4082}`)\n        });\n    } catch (err) {\n        console.log(err.message)\n    }\n\n    node.send({\n        server,\n        app\n    })\n\n    flow.set(\"webServer\", server);\n    flow.set(\"webApp\", app);\n\n}\n\ncontext.set(\"init\", async () => {\n    if (!init) {\n        await main();\n    };\n    init = true\n})\n\n",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "express",
+                "module": "express"
+            },
+            {
+                "var": "http",
+                "module": "http"
+            },
+            {
+                "var": "bodyParser",
+                "module": "body-parser"
+            },
+            {
+                "var": "cors",
+                "module": "cors"
+            },
+            {
+                "var": "socketIo",
+                "module": "socket.io"
+            }
+        ],
+        "x": 140,
+        "y": 300,
+        "wires": [
+            [
+                "5e6f6312ae208896",
+                "67147e1ee896d93f",
+                "fb17081cd30510f6"
+            ]
+        ]
+    },
+    {
+        "id": "fb17081cd30510f6",
+        "type": "function",
+        "z": "a52209a7262ea19f",
+        "name": "Start HTTP",
+        "func": " \nvar emitter = new events.EventEmitter();\nemitter.setMaxListeners(0);\n\nlet returnQueue = 'http-response-' + paralleldriveCuid2.createId();\n\nconst app = flow.get(\"webApp\");\n\nvar addJob = await global.get(\"getQueue\")(\"query\"); \nawait node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Starting at: \" + new Date()\n    });\n\nconst processRequest = async function (req, res) {\n    let requestId = paralleldriveCuid2.createId();\n    await node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Processing at: \" + new Date() + \" \" + requestId\n    });\n    emitter.once(requestId, ({ type, payload }) => {\n        res.type('application/json');\n        switch (type) {\n            case 'data':\n                res.status(200)\n                res.send(payload)\n                break;\n            case 'error':\n                res.status(400)\n                res.send(payload)\n                break;\n        }\n        res.end();\n    });\n    addJob(requestId, {\n        id: requestId,\n        schema: req?.params?.schema,\n        payload: req.body,\n        context: { \n            headers: req.headers,\n            id: requestId,\n            replyTo: returnQueue\n         }\n    }, { jobId: requestId })\n};\n\napp.post(\"/:schema\", processRequest);\napp.post(\"/graphql/:schema\", processRequest);\n\nglobal.get(\"setWorker\")(returnQueue, async ( returnJob ) => {\n    emitter.emit( returnJob.name, returnJob.data );\n    return null\n}, { concurrency: 100 })\n\nawait node.status({\n    fill: \"green\",\n    shape: \"ring\",\n    text: \"Running at: \" + new Date()\n});\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "paralleldriveCuid2",
+                "module": "@paralleldrive/cuid2"
+            },
+            {
+                "var": "events",
+                "module": "events"
+            }
+        ],
+        "x": 370,
+        "y": 320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "67147e1ee896d93f",
+        "type": "function",
+        "z": "a52209a7262ea19f",
+        "d": true,
+        "name": "Start WS",
+        "func": "await node.status({\n    fill: \"red\",\n    shape: \"ring\",\n    text: \"Starting at: \" + new Date()\n})\n\n\ntry {\n    var emitter = new events.EventEmitter();\n    emitter.setMaxListeners(0);\n    const { WebSocketServer, WebSocket } = ws;\n\n    let returnQueue = 'ws-response';\n\n    const app = flow.get(\"webApp\");\n    const server = flow.get(\"webServer\");\n\n    var addJob = await global.get(\"getQueue\")(\"ws\");\n    await node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Starting at: \" + new Date()\n    });\n\n    const wsServer = new WebSocketServer({ noServer: true });\n    wsServer.on(\"connection\", (cb, req) => {\n        try {\n            const { pathname } = url.parse(req.url || \"\");\n            console.log(pathname)\n            if (pathname !== '/socket.io/') {\n                cb.on(\"message\", async (data) => {\n                    console.log(\"ws\", pathname, data.toString())\n                    const { id, type, payload } = JSON.parse(data.toString());\n                    if (type === \"connection_init\") cb.send(JSON.stringify({ type: \"connection_ack\" }));\n                    else if (type === \"subscribe\") {\n                        const requestId = paralleldriveCuid2.createId();\n                        emitter.on(requestId, ({ type: tRes, payload }) => {\n                            if (tRes == \"data\") {\n                                cb.send(JSON.stringify({ id, type: \"next\", payload }));\n                            } else {\n                                cb.send(JSON.stringify({\n                                    id, type: tRes, payload: payload.errors\n                                }));\n                            }\n                        });\n                        addJob(requestId, {\n                            id: requestId,\n                            schema: pathname.split(\"/\").pop(),\n                            payload: payload,\n                            context: {\n                                headers: {},\n                                id: requestId,\n                                replyTo: returnQueue\n                            }\n                        }, { jobId: requestId })\n                    }\n                });\n            }\n            cb.on(\"close\", () => {\n\n            });\n        } catch (err) {\n            console.error(err.message)\n        }\n    });\n\n    server.on(\"upgrade\", (req, socket, head) => {\n        wsServer.handleUpgrade(req, socket, head, wsObject => {\n            wsServer.emit('connection', wsObject, req);\n        })\n    });\n\n    global.get(\"setWorker\")(returnQueue, async (returnJob) => {\n        emitter.emit(returnJob.id, returnJob.data);\n        return null\n    }, { concurrency: 100 })\n\n    await node.status({\n        fill: \"green\",\n        shape: \"ring\",\n        text: \"Running at: \" + new Date()\n    });\n\n} catch (err) {\n    node.error(\"my error message\", err);\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "paralleldriveCuid2",
+                "module": "@paralleldrive/cuid2"
+            },
+            {
+                "var": "events",
+                "module": "events"
+            },
+            {
+                "var": "ws",
+                "module": "ws"
+            },
+            {
+                "var": "url",
+                "module": "url"
+            }
+        ],
+        "x": 360,
+        "y": 440,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "5e6f6312ae208896",
+        "type": "function",
+        "z": "a52209a7262ea19f",
+        "name": "Start SocketIO",
+        "func": "await node.status({\n    fill: \"red\",\n    shape: \"ring\",\n    text: \"Starting at: \" + new Date()\n})\n\nvar emitter = new events.EventEmitter();\nemitter.setMaxListeners(0);\nconst { Server: SocketIOServer, Socket } = socketIo;\n\nlet returnQueue = 'socket-response' + paralleldriveCuid2.createId();\n\nconst app = flow.get(\"webApp\");\nconst server = flow.get(\"webServer\");\n\nvar addJob = await global.get(\"getQueue\")(\"socket\"); \nawait node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Starting at: \" + new Date()\n    });\n\nconst io = new SocketIOServer( server, {\n    // perMessageDeflate: {\n    //     threshold: 1024,\n    //     zlibDeflateOptions: {\n    //         level: 6,\n    //     },\n    //     zlibInflateOptions: {\n    //         chunkSize: 8 * 1024,\n    //     },\n    // },\n    pingInterval: 2000,\n    pingTimeout: 10000,\n    maxHttpBufferSize: 1e8,\n    cors: { origin: \"*\" },\n    httpCompression: { threshold: 1024, chunkSize: 8 * 1024, windowBits: 14, memLevel: 7 }\n});\n\nconst dynamicNamespacePattern = /^\\/dynamic-\\w+$/; // Ví dụ: /dynamic-abc, /dynamic-123\n\nconst processSocketRequest = (socket) => {\n  // Khi một client kết nối thành công vào một namespace khớp với mẫu regex\n  console.log(`User connected to a dynamic namespace: ${socket.nsp.name}`);\n\n  socket.on('data', ({ id, type, payload }) => {\n    try {\n      console.log('sock', id, type, payload)\n      let path = socket.nsp.name;\n      let requestId = paralleldriveCuid2.createId();\n      if (type === \"connection_init\") socket.compress(true).emit('data', { id, type: 'connection_ack' });\n      else if ([\"query\", \"subscription\", \"start\", \"patch\"].includes(type)) {\n        addJob(requestId, {\n          id: requestId,\n          schema: path.split('/').slice(-1)[0],\n          payload: JSON.parse(payload),\n          context: {\n            headers: {},\n            id: requestId,\n            replyTo: returnQueue\n          }\n        }, { jobId: requestId });\n        emitter.on(requestId, ({ type: tRes, payload: pRes }) => {\n            if (tRes == \"data\") {\n                socket.compress(true).emit('data', { id, type: 'data', payload: pRes });\n            } else {\n              socket.compress(true).emit('data', { id, type: tRes, payload: pRes });\n            }\n        });\n      } else if ([\"stop\", \"complete\"].includes(type)) {\n        socket.compress(true).emit('data', { id, type });\n      } else {\n          socket.compress(true).emit('data', { id, type: 'error', payload: { errors: [{ message: \"'type' is not defined!\" }] } });\n      }\n    } catch (err) {\n      socket.compress(true).emit('data', { id, type: 'error', payload: { errors: [{ message: err.message }] } });\n    }\n    \n    console.log(`Message from ${socket.nsp.name}:`);\n    // Bạn có thể phát sự kiện trở lại chỉ cho namespace đó\n    // socket.nsp.emit('message', `Echo from ${socket.nsp.name}: ${msg}`);\n  });\n\n  socket.on('disconnect', () => {\n    console.log(`User disconnected from a dynamic namespace: ${socket.nsp.name}`);\n  });\n}\n\n// Sử dụng hàm trong io.of() để kiểm tra namespace\nconst dynamicNamespace = io.of((name, auth, next) => {\n  // 'name' là tên namespace mà client đang cố gắng kết nối\n  console.log(name, \"dynamic anme\")\n    next(null, true); // (error, success)\n});\n\ndynamicNamespace.on('connection', processSocketRequest);\n\nglobal.get(\"setWorker\")(returnQueue, async ( returnJob ) => {\n    emitter.emit( returnJob.name, returnJob.data );\n    return null\n}, { concurrency: 100 })\n\nawait node.status({\n    fill: \"green\",\n    shape: \"ring\",\n    text: \"Running at: \" + new Date()\n});\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "paralleldriveCuid2",
+                "module": "@paralleldrive/cuid2"
+            },
+            {
+                "var": "events",
+                "module": "events"
+            },
+            {
+                "var": "url",
+                "module": "url"
+            },
+            {
+                "var": "socketIo",
+                "module": "socket.io"
+            }
+        ],
+        "x": 380,
+        "y": 380,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "17b13be6b823c221",
+        "type": "join",
+        "z": "a52209a7262ea19f",
+        "name": "Compile",
+        "mode": "custom",
+        "build": "array",
+        "property": "",
+        "propertyType": "full",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "useparts": true,
+        "accumulate": false,
+        "timeout": "",
+        "count": "3",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "num",
+        "reduceFixup": "",
+        "x": 690,
+        "y": 200,
+        "wires": [
+            [
+                "e0be9b659f69866d"
+            ]
+        ]
+    },
+    {
+        "id": "88271cb98fbef6b7",
+        "type": "function",
+        "z": "a52209a7262ea19f",
+        "name": "function 8",
+        "func": "\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 120,
+        "y": 200,
+        "wires": [
+            [
+                "c0db84696cc1b834",
+                "82db55a73ed7cf82",
+                "fbfe01dbb99abb1c"
+            ]
+        ]
+    },
+    {
+        "id": "82db55a73ed7cf82",
+        "type": "subflow:5ed478d1a62e4007",
+        "z": "a52209a7262ea19f",
+        "name": "",
+        "x": 390,
+        "y": 200,
+        "wires": [
+            [
+                "17b13be6b823c221"
+            ]
+        ]
+    },
+    {
+        "id": "fbfe01dbb99abb1c",
+        "type": "subflow:1e273549eda8541e",
+        "z": "a52209a7262ea19f",
+        "name": "",
+        "env": [
+            {
+                "name": "REDIS_CONNECTION",
+                "value": "REDIS_CONNECTION",
+                "type": "env"
+            }
+        ],
+        "x": 390,
+        "y": 140,
+        "wires": [
+            [
+                "17b13be6b823c221"
+            ]
+        ]
+    },
+    {
+        "id": "9a00fd0253f8665e",
+        "type": "inject",
+        "z": "a52209a7262ea19f",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 40,
+        "wires": [
+            [
+                "88271cb98fbef6b7"
+            ]
+        ]
+    },
+    {
+        "id": "1a36bddb3091b1ba",
+        "type": "inject",
+        "z": "a52209a7262ea19f",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 100,
+        "wires": [
+            [
+                "88271cb98fbef6b7"
+            ]
+        ]
+    }
+]

@@ -1,0 +1,99 @@
+<% locals = Object.assign(locals, { shop_name: 'Điện Máy Cô Lan', shop_address: 'Số 1 Xuân Bách, xã Quang Tiến, huyện Sóc Sơn, Hà Nội', shop_phone: '0349 839 239', shop_email: 'dienmaycolan@gmail.com', shop_bank: 'Ngân hàng: Ngân hàng Việt Nam Thịnh Vượng VPBank<br>Chủ tài khoản: LE DUC HIEP<br>Số tài khoản: 22726366<br>Nội dung: COLAN + (SĐT đặt hàng)' });
+if ( __req.hostname.endsWith("cokhi24h.shop")) {
+    locals = Object.assign(locals, { shop_name: 'Cơ Khí 24H', shop_address: 'Số 1 Xuân Bách, xã Quang Tiến, huyện Sóc Sơn, Hà Nội', shop_phone: '0349839239', shop_email: `cskh@cokhi24h.shop`, shop_bank: 'Ngân hàng: Ngân hàng Việt Nam Thịnh Vượng VPBank<br>Chủ tài khoản: LE DUC HIEP<br>Số tài khoản: 22726366<br>Nội dung: COKHI24H + (SĐT đặt hàng)' });
+} else if ( __req.hostname.endsWith("shopcolan.com")) {
+    locals = Object.assign(locals, { shop_name: 'Shop Cô Lan', shop_address: 'Xuân Bách, Quang Tiến, Sóc Sơn, Hà Nội', shop_phone: '0349 839 239', shop_email: `cskh@shopcolan.com`, shop_bank: 'Ngân hàng: Ngân hàng Việt Nam Thịnh Vượng VPBank<br>Chủ tài khoản: LE DUC HIEP<br>Số tài khoản: 22726366<br>Nội dung: SHOPCOLAN + (SĐT đặt hàng)' });
+} else if ( __req.hostname.endsWith("nhacolan.com")) {
+    locals = Object.assign(locals, { shop_name: 'Nhà Cô Lan', shop_address: 'Số 1 Xuân Bách, Quang Tiến, Sóc Sơn, Hà Nội', shop_phone: '0377671538', shop_email: `cskh@nhacolan.com`, shop_bank: 'Ngân hàng: Ngân hàng Việt Nam Thịnh Vượng VPBank<br>Chủ tài khoản: LE DUC HIEP<br>Số tài khoản: 22726366<br>Nội dung: NHACOLAN + (SĐT đặt hàng)' });
+} else if ( __req.hostname.endsWith("cokhicolan.com")) {
+    locals = Object.assign(locals, { shop_name: 'Shop Cô Lan', shop_address: 'Số 1 Xuân Bách, xã Quang Tiến, huyện Sóc Sơn, Hà Nội', shop_phone: '0839316847', shop_email: `cskh@cokhicolan.com`, shop_bank: 'Ngân hàng: Ngân hàng Việt Nam Thịnh Vượng VPBank<br>Chủ tài khoản: LE DUC HIEP<br>Số tài khoản: 22726366<br>Nội dung: DH + (SĐT đặt hàng)' });
+}%>
+<%- await include(`section/header`, locals); -%>
+<head>
+    <script type="text/javascript">
+    window.ladi_viewport = function () {var screen_width = window.ladi_screen_width || window.screen.width;var width = window.outerWidth > 0 ? window.outerWidth : screen_width;var widthDevice = width;var is_desktop = width >= 768;var content = "";if (typeof window.ladi_is_desktop == "undefined" || window.ladi_is_desktop == undefined) {window.ladi_is_desktop = is_desktop;}if (!is_desktop) {widthDevice = 420;} else {widthDevice = 960;}content = "width=" + widthDevice + ", user-scalable=no";var scale = 1;if (!is_desktop && widthDevice != screen_width && screen_width > 0) {scale = screen_width / widthDevice;}if (scale != 1) {content += ", initial-scale=" + scale + ", minimum-scale=" + scale + ", maximum-scale=" + scale;}var docViewport = document.getElementById("viewport");if (!docViewport) {docViewport = document.createElement("meta");docViewport.setAttribute("id", "viewport");docViewport.setAttribute("name", "viewport");document.head.appendChild(docViewport);}docViewport.setAttribute("content", content);};window.ladi_viewport();window.ladi_fbq_data = [];window.ladi_fbq = function (track_name, conversion_name, data, event_data) {window.ladi_fbq_data.push([track_name, conversion_name, data, event_data]);};
+</script>
+</head>
+<% let body = `landing${__req.path}`; %> <%- await include(body, locals); -%>
+<body>
+   <%- await include(`section/footer`, locals); -%>
+</body>
+<%
+    console.log(process.env)
+    let res = await axios({
+        method: "post",
+        url: process.env.GRAPHQL_URL + "/app",
+        data: JSON.stringify({ query: `query List_q4b5b1ml4mu5k5sqqlv9yf3i($where: Modelq4b5b1ml4mu5k5sqqlv9yf3iWhereInput) {
+  data:list_q4b5b1ml4mu5k5sqqlv9yf3i(where: $where) {
+    products:list_eswjvms0hbrde33rbmhb1fle {
+      id
+      thumbnail:oqvqmzq3hhtzkagshgo65jux
+      sku:o0tt0e3c3ujce3y5x32pp65x
+      name:wczb97zyw79ts16yq36dbg03
+      variants:list_nfc7w2xhj1yqmosr63wawkj1 {
+        id
+        thumbnail:dgmsgu2iugbaoiuu4uybkr8t
+        list_price:ii84642a60hihr2xcujkbc4s
+        name:ovxu2wh4txg3of2nuenigd4c
+        sku:a3cucn95wxqxvg0r2mge70ay
+        price:btaral3r3stdaaf8hqezv189
+        full_name:oc1jblzn43ce044xjijoj5ka
+      }
+    }
+  }
+}`, variables: {
+  "where": {
+    "list_gfksgqxqqf5v1r9xwnx2mx0t": {
+      "list_aobcevtk024vownl3ekhmg6u": {
+        "kycp2g09n2qp6k4mxxnzlj3k": {
+          "hasKey": __req.path
+        }
+      }
+    },
+    "list_gwtuz6s83hc28tbjjmhh7l84": {
+      "list_egwyrwihsmtwir2fcin633r6": {
+        "oj8syp8p47eoa7bmmvqa5mw4": {
+          "hasKey": "landing"
+        }
+      }
+    }
+  }
+} }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        maxRedirects: 20,
+    });
+    const productId = res.data.data;
+    const product = res.data?.data?.data?.[0]?.products?.[0] || {};
+    console.log("productId", res.data?.data?.data?.[0]?.products?.[0])
+    let checkoutstate = {};
+    checkoutstate = Object.assign( checkoutstate, {
+              product: product,
+              variants: product.variants,
+              mode: "dudusales",
+              forms: [
+                  {
+                      type: "ladipage",
+                      config: {
+                          ladipage_id: "61b30bf189be2200136ca060",
+                          form_config_id: "6202a30c4f44450012e22d6e",
+                      },
+                  },
+                  {
+                      type: "telegram",
+                      config: {
+                          token: "1436204749:AAH3CvQecMyK8p0ImLK35MqMvVgR4Jql3Mw",
+                          group_id: "-773573707",
+                      },
+                  },
+              ],
+              autoPixel: true
+          });
+          delete checkoutstate.product.variants;
+%>
+
+<script>
+  window["product"] = <%- JSON.stringify(productId) %>;
+      window["CheckoutState"] = Object.assign(window["CheckoutState"] || {}, <%- JSON.stringify(checkoutstate); %> );
+</script>

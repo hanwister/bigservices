@@ -1,0 +1,723 @@
+<style>
+        .video-css {
+            height: 100%;
+        }
+    </style>
+    <!-- Checkout (simple-payment.js) -->
+    <script src="/simple-payment.js"></script>
+
+    <% 
+    let data_comment = {};
+        let _avatar = [["Mộc Vũ", "https://statics.pancake.vn/web-media/54/ea/1c/b0/a0b06dbe3cef3d48f7befb4beadb5602dc287eae4cb6d083b557bdae.jpg"],
+  ["Nguyễn Đăng Hải", "https://statics.pancake.vn/web-media/21/a4/71/e8/b9733978152dcca862347542d401054d386ffc86e6ad216d094c5574.jpg"],
+  ["Nguyễn Hoàng", "https://statics.pancake.vn/web-media/64/b7/fe/0e/5eaaea067c0263a14319b22155e29f33be0b08c98a19718800ab50a6.jpg"],
+  ["Phạm Khánh Trung", "https://statics.pancake.vn/web-media/35/92/9b/07/c5c0bb77c35d78100d43eff5b9d694237f08a6d4ea465562042f7f4f.jpg"],
+  ["Vũ Duy Thành", "https://statics.pancake.vn/web-media/35/3d/b9/53/979817dfdaefc351d91f73c8e954e7d01ef862d96a0bf59d357c7e3d.jpg"],
+  ["Chung Lê", "https://statics.pancake.vn/web-media/48/6a/08/b8/55182aae320670ca8824d85568734acb0635e63f07d3c43665d4659c.jpg"],
+  ["Mạnh Tùng", "https://statics.pancake.vn/web-media/b7/6f/e0/ff/14877806239389ab963e31c6b88d69432aec3a13982883c0142d7e1a.jpg"],
+  ["Đức Linh", "https://statics.pancake.vn/web-media/86/7e/1f/67/af0475a0dbf297c2f49239d467b27d83ccd98d4d8fb4d6f2e44531f0.jpg"],
+  ["Phạm Hoàng", "https://statics.pancake.vn/web-media/31/e5/14/d0/fcc1ee6fc6b2d77fb0e3c2d812761b2f55e97c10f3885d0499d7106d.jpg"],
+  ["Nguyễn Vũ Sơn", "https://statics.pancake.vn/web-media/91/a8/fb/67/fa9e272e7834590c95f32bcedbf2358240645c8457e797aad311e6bb.jpg"],
+  ["Nguyễn Vương", "https://statics.pancake.vn/web-media/6b/2d/c0/62/88ba685417c7efbfe766c4411b4bd293bf0d4ca5d93a93f0eded0624.jpg"],
+  ["Văn Chin", "https://statics.pancake.vn/web-media/78/fc/dd/03/9b0e61c91f0ff91ee5215d16509b6f96059ba853dcab0bcfb7383ac5.jpg"],
+  ["Nguyên Tuấn Linh", "https://statics.pancake.vn/web-media/64/63/19/0f/735ffd2788186af04bccc4fb2fa4d487d4c4f3046f5c737e7286523a.jpg"],
+  ["Tuệ Nhật", "https://statics.pancake.vn/web-media/3d/d6/65/07/7cf4979e2e71d822deff0b7323fe6ce482357bd99e6f370f439b38b3.jpg"],
+  ["Thắng Lớn", "https://statics.pancake.vn/web-media/ad/96/d4/61/cb6faccf8a5664e68be7a87a20afad44bcec4157ee738716d844d385.jpg"],
+  ["Hoàng Trình", "https://statics.pancake.vn/web-media/c1/d1/65/99/88ff1a24e388a70a206c82624d8349ed0a61164b6b7bf57082811f70.jpg"],
+  ["Phạm Trần Gia Bảo", "https://statics.pancake.vn/web-media/8d/1c/59/9f/0b607c376bf99b14556a5bad50a56df54b04a58579d49002850cd7e2.jpg"],
+  ["Phan Nhật Huy", "https://statics.pancake.vn/web-media/a0/b7/9d/13/dedbdc52ae7a3f1bf763d2c5529ebed51521e21bfa97e14207995838.jpg"],
+  ["Đỗ Duy Duy", "https://statics.pancake.vn/web-media/5a/62/af/52/89a26ceb52b7f989215c7ba891c6b16101e0b46f883c4852ae21dd24.jpg"],
+  ["Nguyễn Hùng", "https://statics.pancake.vn/web-media/b6/ff/92/42/f84e00d04c3354a403cc68da1f1c5964dd18b0d4043d8def34144ceb.jpg"],
+  ["Huỳnh Lê", "https://statics.pancake.vn/web-media/93/6c/5a/e1/0d108083e59609731de71a324044f1fe2190065b917aab5019ed5694.jpg"],
+  ["Nguyễn Kiên", "https://statics.pancake.vn/web-media/16/41/61/0c/84da94193990694bfec856d90a882249ecc3a5d3ec860ab15ab63c60.jpg"],
+  ["Trần Đình Tài", "https://statics.pancake.vn/web-media/6c/b0/11/8d/4e685913e6b21095c4a93bad14844bbeca9b45c448276a35374c1ab2.jpg"],
+  ["Nguyễn Bắc", "https://statics.pancake.vn/web-media/1f/9b/4d/14/3a4ca31a1cbe70d2e246f71f7c1b7b7b66e58e742302a974b01e88e2.jpg"],
+  ["Mạnh Tuấn", "https://statics.pancake.vn/web-media/3a/d2/5e/10/21b9f26b8331cf7502975d6bba8c78e0a867654d9a3a02b746a3b718.jpg"],
+  ["Phạm Văn Hải", "https://statics.pancake.vn/web-media/1e/ad/13/ee/83465bd6a03d858247d8ab9c470bf880aa6999a23abb66efa55544d6.jpg"],
+  ["Nguyễn Thanh Cường", "https://statics.pancake.vn/web-media/5f/f9/f6/dc/533c0006693691fcb09c4336377ce1309b3e66ca10eef912fab89858.jpg"],
+  ["Phan Long Vũ", "https://statics.pancake.vn/web-media/98/77/0b/9d/97a1769cbf11b07fbbe9d8d982b6b529f5e2550eda45e4ed12b39c1f.jpg"],
+  ["Tong Thuyet", "https://statics.pancake.vn/web-media/20/d3/a1/b7/50938fa508babe757202f7d0ecea37f5e398aee51359e3375c9cc4eb.jpg"],
+  ["Lê Trung Hải", "https://statics.pancake.vn/web-media/9f/27/fb/14/dfad2cc3ddd551fab2acc0cac96164959d9971e686c6af488664f678.jpg"],
+  ["Trần Mạnh Nghĩa", "https://statics.pancake.vn/web-media/df/7f/0f/4e/052a04958ae9b012e3e9af27c89604aab7cd443407c21d4781219956.jpg"],
+  ["Nguyễn Công Khuê", "https://statics.pancake.vn/web-media/3d/57/fb/25/ae1975268228af10daef7b0b881c78d1e51c0b2da3715d82cfb02c0c.jpg"],
+  ["Minh Hiếu", "https://statics.pancake.vn/web-media/a4/9f/f9/c8/f1617f548ec3e433f6f90cd0e6916590e4c47ce63dd54a2086938ab6.jpg"],
+  ["Trung Thanh Lê", "https://statics.pancake.vn/web-media/77/20/7d/d9/2da97549dcbf6d4f70d688959363db46987c5e06506edf477ff6c3df.jpg"]];
+        let _buy_response = [
+    "Dạ shop gửi tin nhắn cho anh chị rồi, anh chị vui lòng check ib giúp em ạ!",
+    "Dạ shop tiếp nhận thông tin và xử lý ạ!",
+    "Dạ anh đặt hàng cho em xin thêm sđt và địa chỉ em lên đơn hàng cho mình ạ!",
+    "Dạ shop tiếp nhận thông tin và xử lý ạ!",
+    "Dạ vâng anh check ib giúp em ạ!",
+    "Dạ anh check tin nhắn chờ giúp em ạ!",
+    "Dạ em cảm ơn anh đã ủng hộ ạ, nhân viên bên em sẽ liên hệ mình ngay ạ!",
+    "Dạ shop gửi tin nhắn cho anh chị rồi, anh chị vui lòng check ib giúp em ạ!",
+    "Dạ shop tiếp nhận thông tin và xử lý ạ!",
+    "Dạ anh đặt hàng cho em xin thêm sđt và địa chỉ em lên đơn hàng cho mình ạ!",
+    "Dạ shop tiếp nhận thông tin và xử lý ạ!",
+    "Dạ vâng anh check ib giúp em ạ!",
+    "Dạ anh check tin nhắn chờ giúp em ạ!",
+    "Dạ em cảm ơn anh đã ủng hộ ạ, nhân viên bên em sẽ liên hệ mình ngay ạ!",
+    "Dạ shop gửi tin nhắn cho anh chị rồi, anh chị vui lòng check ib giúp em ạ!",
+    "Dạ shop tiếp nhận thông tin và xử lý ạ!",
+    "Dạ anh đặt hàng cho em xin thêm sđt và địa chỉ em lên đơn hàng cho mình ạ!",
+    "Dạ shop tiếp nhận thông tin và xử lý ạ!",
+    "Dạ vâng anh check ib giúp em ạ!",
+    "Dạ anh check tin nhắn chờ giúp em ạ!",
+    "Dạ em cảm ơn anh đã ủng hộ ạ, nhân viên bên em sẽ liên hệ mình ngay ạ!",
+    "Dạ shop gửi tin nhắn cho anh chị rồi, anh chị vui lòng check ib giúp em ạ!",
+    "Dạ shop tiếp nhận thông tin và xử lý ạ!",
+    "Dạ anh đặt hàng cho em xin thêm sđt và địa chỉ em lên đơn hàng cho mình ạ!",
+    "Dạ shop tiếp nhận thông tin và xử lý ạ!",
+    "Dạ vâng anh check ib giúp em ạ!",
+    "Dạ anh check tin nhắn chờ giúp em ạ!",
+    "Dạ em cảm ơn anh đã ủng hộ ạ, nhân viên bên em sẽ liên hệ mình ngay ạ!",
+    "Dạ shop gửi tin nhắn cho anh chị rồi, anh chị vui lòng check ib giúp em ạ!",
+    "Dạ shop tiếp nhận thông tin và xử lý ạ!",
+    "Dạ anh đặt hàng cho em xin thêm sđt và địa chỉ em lên đơn hàng cho mình ạ!",
+    "Dạ shop tiếp nhận thông tin và xử lý ạ!",
+    "Dạ vâng anh check ib giúp em ạ!",
+    "Dạ anh check tin nhắn chờ giúp em ạ!",
+    "Dạ em cảm ơn anh đã ủng hộ ạ, nhân viên bên em sẽ liên hệ mình ngay ạ!",
+    "Dạ shop gửi tin nhắn cho anh chị rồi, anh chị vui lòng check ib giúp em ạ!",
+    "Dạ shop tiếp nhận thông tin và xử lý ạ!",
+    "Dạ anh đặt hàng cho em xin thêm sđt và địa chỉ em lên đơn hàng cho mình ạ!",
+    "Dạ shop tiếp nhận thông tin và xử lý ạ!",
+    "Dạ vâng anh check ib giúp em ạ!",
+    "Dạ anh check tin nhắn chờ giúp em ạ!",
+    "Dạ em cảm ơn anh đã ủng hộ ạ, nhân viên bên em sẽ liên hệ mình ngay ạ!"
+];
+        let _buy_text = [
+  "Đặt 1 bộ nhé shop",
+  "Anh đặt thêm  1 máy nhé, máy ok lắm",
+  "Cho 1 máy 0398571677",
+  "0968877065  - khu phố 8 Thi trấn tân sơn, h ninh sơn, t ninh thuận",
+  "Tôi muốn mua 1 máy",
+  "Cho 1 bộ sđt 0396589294",
+  "Anh vừa đặt hàng qua hotline, cho anh hỏi gửi về Mỹ Đình mai anh nhận được hàng không",
+  "0942031599 tư vấn đặt hàng",
+  "Alo shop, còn hàng không, anh muốn lấy thêm 1 thân máy",
+  "Ship cho tôi 1 máy như quảng cáo",
+  "Mai anh ở nhà, báo giao hàng giao lại cho anh",
+  "Hàng của tôi về đến nơi chưa",
+  "Lấy 1 máy nhé",
+  "Bán cho cục sạc pin 0944301069",
+  "Mình nhận được hàng rồi, shop gửi cho mình video gắn pin vào sạc nhé, mình phụ nữ không quen dùng",
+  "Mình đăt hàng, shop ib giùm",
+  "Đã nhắn tin sđt cho shop rồi nhưng chưa thấy ai chốt đơn",
+  "2 máy nhé, hàng chất lượng như quảng cáo nha",
+  "Ban 1 cai sdt 0983026410",
+  "Gọi cho tôi 0767327659",
+  "Lấy anh 1 máy, đủ bộ như hình",
+  "Còn hàng không shop, ship hỏa tốc được không, mình đặt 1 máy",
+  "Shop ơi để anh 1 máy",
+  "Check ib, anh đặt hàng",
+  "Shop gửi hàng cho mình chưa? Minh muốn lấy thêm 1 cái, gộp đơn cho mình",
+  "Anh lấy 1 máy này nhé,  anh có vừa số hotline nhân viên lên đơn rồi. Kiểm tra gửi sớm giúp anh",
+  "1 máy 0969779940",
+  "Muốn mua 1 máy",
+  "Bao tiền 1 bộ",
+  "Shop cho xin giá sản phẩm",
+  "Ship về HCM mất bao lâu",
+  "Sản phẩm có bảo hành bao lâu",
+  "Mình muốn nhập sỉ, shop cho giá nhé",
+  "Ib giá",
+  "Sản phẩm được tặng những gì",
+  "Shop ở đâu",
+  "Thân máy giá bao nhiêu",
+  "Shop ơi, em có thân máy rồi, muốn mua 2 cục pin, shop có bán không",
+  "Miễn phí ship không",
+  "Tôi cần tư vấn",
+  "Cho giá đi ạ",
+  "Được kiểm tra hàng không",
+  "Mua 10 máy giá sao shop",
+  "ib",
+  "Giảm giá còn bao nhiêu",
+  "Shop ib mình",
+  "Máy chất lượng không",
+  "Có miễn ship không",
+  "Ship về Quảng Ninh bao tiền? Có miễn phí ship không",
+  "Shop cho xin giá đi",
+  "Cho giá",
+  "Xin giá",
+  "Shop tư vấn cho mình",
+  "Mình nhận được hàng rồi, shop gửi cho mình video gắn pin vào sạc nhé, mình phụ nữ không quen dùng",
+  "Shop có máy cưa pin không, anh mua máy bên shop thấy ổn nên tính mua thêm, gửi ảnh qua cho anh nhé"
+];
+        let _review_image = {"/wrench-dewalt-20v": [
+    "https://statics.pancake.vn/web-media/04/51/c0/9f/4e59767393e9a3e976ec19de7184198bf3abec730c838fff5fd12cd8.jpg",
+    "https://statics.pancake.vn/web-media/cf/77/ae/db/1aba8a8e6dbd9ee4a46eeac87a97909a093965e937839eab7bea80a2.jpg",
+    "https://statics.pancake.vn/web-media/cf/32/7d/72/5849673b0f9bec0652c0314ec530e67ecf38ee91c967c9f3b78d7875.jpg",
+    "https://statics.pancake.vn/web-media/c1/2e/cc/98/3022a37a59a331d84c92cbd011dc0308f0a4652b97601eaceec84050.jpg",
+    "https://statics.pancake.vn/web-media/2d/5b/da/46/fff4c48a3006d2a44986d0b94e7a50c79e6a9786e4ea2ca2ab39aae9.jpg",
+    "https://statics.pancake.vn/web-media/d2/91/5d/c7/fb06b142d09c39018f299024f58817042637f4181c1923d1b6b30d92.jpg",
+    "https://statics.pancake.vn/web-media/8c/4c/f7/c5/ed3153bb9433b91eebb9522cc651b4138d8d7dfd9028e79f364dccdf.jpg",
+    "https://statics.pancake.vn/web-media/ab/c9/ab/24/46378f761c146e3e088259b4320ed63bf1eff7d007268b65328ade3e.jpg",
+    "https://statics.pancake.vn/web-media/fc/35/5e/fb/c1b672d4bba136fe8099fdae35bce05d399ba51bd8ed5a454055eb76.jpg",
+    "https://statics.pancake.vn/web-media/3d/93/1e/00/456af53ffa1d0ee66198edf7572e8a8780aef7edf29bfcae4194796a.jpg",
+    "https://statics.pancake.vn/web-media/a1/7b/56/fc/7c7a3e470cc41b5aafb13b9fb0a3dbe0eb03fd5ca3d8094351aef108.jpg",
+    "https://statics.pancake.vn/web-media/21/4b/09/51/a4c85792b53eb9a5b04586fede409ad7f812dde1f459a829bee8e87b.jpg",
+    "https://statics.pancake.vn/web-media/3c/30/90/5c/a13afc92d781d5122d5bfc6c425204d0d552e5676f4f728c596ea9dd.jpg"
+  ],
+  "/drill-dewalt-199v": [
+    "https://statics.pancake.vn/web-media/8e/f2/f8/b5/68d197e1c6de451514a432657b99ef774497faeb6c92f663560b02e5.jpg",
+    "https://statics.pancake.vn/web-media/eb/97/2c/ec/b99bd1d483caeaa22377d19ce960f8b548b93d43c8082e5a2f6f0373.jpg",
+    "https://statics.pancake.vn/web-media/71/64/f7/d8/cde2d405ca21379047a6adc903a565cb8e27dc0fc4344eed424e15ed.jpg",
+    "https://statics.pancake.vn/web-media/82/ea/bc/56/856361959725dcf6fd6a708fcda75fa0390e89a0c8673a8b6b88044d.jpg",
+    "https://statics.pancake.vn/web-media/76/02/08/fc/2982e8587b700a628b589662eaac411bb6ca2167e804ad91602e408c.jpg",
+    "https://statics.pancake.vn/web-media/b4/38/79/75/ef037360a2f58bed03fede47ae62b94e5f6e26f6fd2c0280d9302d2a.jpg",
+    "https://statics.pancake.vn/web-media/27/3d/d5/90/065be2991aaa267226a8c61ec3411ad941926edc68b924ee3b1a5103.jpg"
+  ],
+  "/drill-makita-199v": [
+    "https://statics.pancake.vn/web-media/0f/ac/cc/45/1f102d4f2737d26b2824a4a9f83d66ef8ebe8680db51e368a828214e.jpg",
+    "https://statics.pancake.vn/web-media/fd/5c/38/90/7c20d6e3480ff6556de306fca6b5b627f3ac2c003020a8e0df70ce6c.jpg",
+    "https://statics.pancake.vn/web-media/b5/36/5c/c4/1fa63640760598249e6ce797c45213f0e2ef17e83eb745e7ed3c886f.jpg",
+    "https://statics.pancake.vn/web-media/d5/2f/aa/4e/af460b018205e8f994db85fbcafa79f0dcd2dfe2dc92b5900ab5df03.jpg",
+    "https://statics.pancake.vn/web-media/7e/28/c0/44/3ac937754e78e71ddb01222be4be51a609fc0c36cf94350e17f68d33.jpg",
+    "https://statics.pancake.vn/web-media/89/86/46/bc/b1b7d6b4bc3e3d6663fce9bf2459fa8f0f111d094816e7890c14f2a5.jpg",
+    "https://statics.pancake.vn/web-media/5b/9c/77/9a/f9de697ba9b376b0d4ef6d896d9d69565820c72c5a37b1a17c7e7c11.jpg"
+  ],
+  "/wash-car-hitachi-199v": [
+    "https://statics.pancake.vn/web-media/1a/ff/5c/79/6867b4ba65166fd67707a9a9c6911d3800f6ad09f657a4626da4250d.jpg",
+    "https://statics.pancake.vn/web-media/e4/69/cb/e2/7b44f8f2eaa52fe8ea3ca563acb04c2dc207e4ee4dc86260d1152d4f.jpg",
+    "https://statics.pancake.vn/web-media/33/13/e3/c4/94adc90d63bcf5c57eba94441a25201a9cffaf21698a7ba7e9833482.jpg",
+    "https://statics.pancake.vn/web-media/31/4e/39/0e/1b1e38f656518b7dd19d22441bf4a75c6e64136927de94d0e1130cb5.jpg",
+    "https://statics.pancake.vn/web-media/07/94/20/0d/ffadd795d8f3499adcee4cf73d90aac97a7f9f2fd4f4cecb2162b209.jpg",
+    "https://statics.pancake.vn/web-media/bb/28/33/1e/b9c884d5ddba8cc0581aac218d8bd1f280a5910735f2745942b1889a.jpg",
+    "https://statics.pancake.vn/web-media/2a/42/0d/28/6fb80c398621b8c74cbf6df212a71afc756afb2ee7d62f9f17b1e3d2.jpg"
+  ],
+  "/saw-hitachi-199v-20cm": [
+    "https://statics.pancake.vn/web-media/28/5d/ad/d7/7ed64863ff158ecfe59ce8cec57a1d190351f7315d3f10603bd60681.jpg",
+    "https://statics.pancake.vn/web-media/14/e4/b7/99/bbe9f829dc7a39c51837c80e18f2ad702c9a9bbf1c848f77f76d6a33.jpg",
+    "https://statics.pancake.vn/web-media/9f/85/02/fc/82acbc3c89fe9332ddef4ccbe325fb4b8085b8af43c92abae018d753.jpg",
+    "https://statics.pancake.vn/web-media/30/35/3b/2a/339a4f3f21d6d3e043ebff38d393bdbb96585ebfcb20cecf61126345.jpg",
+    "https://statics.pancake.vn/web-media/f6/b7/99/be/786c5a1c415e1266526ebcf3a6769caa4e26e12f5492cb06965bc569.jpg"
+  ],
+  "/drill-dewalt-72v": [
+    "https://statics.pancake.vn/web-media/1f/e2/5a/a9/a85f8ec07a9dc4da1fd457581aa8cca671318dd0b1efa4d5c60e42df.jpg",
+    "https://statics.pancake.vn/web-media/1e/a2/37/f9/7a1962b60f3433b32301bb83969707c0bfc7beca57a9198ad24bf02c.jpg",
+    "https://statics.pancake.vn/web-media/3d/14/b3/44/f353ea57162528bdd9c4260331b830cfcb9c76b75ad5b7d4facad64f.jpg",
+    "https://statics.pancake.vn/web-media/87/bd/6a/88/15f81de3cbf4bc238297c8aa290bc0117a7d2515bfbe78abd03c787e.jpg",
+    "https://statics.pancake.vn/web-media/22/88/92/aa/d148caec7483951b2b5bf317ab4dddb081a6d26ce5f0588df09ffd8a.jpg",
+    "https://statics.pancake.vn/web-media/f4/55/06/46/4af7ce8d04e13a45b3ad9a7385dd1734416e117563c213dd0a8f97ab.jpg",
+    "https://statics.pancake.vn/web-media/0c/57/2e/4b/6104be2227a035f6bb68961f653b526717f755e51380c8635b8c0cdf.jpg",
+    "https://statics.pancake.vn/web-media/bc/83/13/e5/e1d9a8b0177da3d68940d47b5646bec400817e6596c5b276de3b12a2.jpg",
+    "https://statics.pancake.vn/web-media/ff/12/da/cb/aae844511d226e5cc0530a27a5d8b9dfbb8e52099c55ced12dd9ebe3.jpg"
+  ],
+  "/grinder-hitachi-199v": [
+    "https://statics.pancake.vn/web-media/cf/0c/e7/12/405b156f3749b0fd968398280d4de98ed651bd6f867cc004974a65f9.jpg",
+    "https://statics.pancake.vn/web-media/e2/e0/dc/a8/8881e6301ec31042578c1e06c7b6270fc8df47d3b44fefb8a45786cb.jpg",
+    "https://statics.pancake.vn/web-media/77/a8/a6/65/2c17ec3fd5bdd80c8838ac10129d20bb491e32f97aff2a905675c445.jpg",
+    "https://statics.pancake.vn/web-media/c5/2c/50/95/1fb104454fff7fba63f0156639fc133c7cb85cff6501a296089a77e1.jpg",
+    "https://statics.pancake.vn/web-media/d8/70/34/9e/da5d86e91bc26a94246885bae68ba0720ad32da2cafb59ba4c9a2042.jpg",
+    "https://statics.pancake.vn/web-media/ba/7c/85/50/abb1476b5271f415a0e19be9bebc55ed198943fee782c375459d3aec.jpg"
+  ],
+  "/grinder-makita-199v": [
+    "https://statics.pancake.vn/web-media/b8/bd/48/86/8ee35868054692a321265e6de8c9d9cbce83218ad4093d026a49347e.jpg",
+    "https://statics.pancake.vn/web-media/b7/9d/b2/bd/cc43520f70760d17f32fb9e8a3d81ee8af76c1b191167597585e1a1a.jpg",
+    "https://statics.pancake.vn/web-media/36/36/65/89/2722dbb615cd296af69a3a946584d59478916d9efdceaf3feb603217.jpg",
+    "https://statics.pancake.vn/web-media/3e/c5/0d/e5/8c6670d7bf8d0897cd50dd792db48f5748a0ec6a30d516ba46368305.jpg",
+    "https://statics.pancake.vn/web-media/74/f6/1d/2c/74a581e3da1d06bcf710132c92d2ba99e8920100db4140fc5ed1c94a.jpg",
+    "https://statics.pancake.vn/web-media/46/3b/f3/6d/b6b4755ebd360ca4aa780d37e557e3dae75b149b0a372d78c2551102.jpg",
+    "https://statics.pancake.vn/web-media/81/06/1e/d3/05a73923574f1b8f59beca488cecab6fded52250b22a36442a335bed.jpg",
+    "https://statics.pancake.vn/web-media/8a/51/62/b4/d9bc52cc0d6d548a941c6051c13db0e3a659599c6eaf18bfe9078ea8.jpg",
+    "https://statics.pancake.vn/web-media/f5/9a/cf/b8/6a5e8d8601f2c8b6bcc4c7973e2542616b4d29b43a9411772aedb8b4.jpg"
+  ],
+  "/wremch-makita-199v-1080nm": [
+    "https://statics.pancake.vn/web-media/78/d7/9d/b2/46db3213961a8a637cfa6cea50f36f5e5c6750307dd0aaa717b586f2.webp",
+    "https://statics.pancake.vn/web-media/fc/0d/b7/bb/2e4b4cd8628a2ab74a1ffde828615a7654e04d9f918994f3b6115e99.webp",
+    "https://statics.pancake.vn/web-media/11/df/4f/a2/b9453f5ae805841af8b96803de95cb27b94bfe567ecad5a85bbc798e.webp",
+    "https://statics.pancake.vn/web-media/77/1c/73/b0/d9892748946260efb2c4376e39ffa1db0b8b1d5fbb3519d0b88039f5.webp",
+    "https://statics.pancake.vn/web-media/e2/41/50/7c/99d3b25532f92abc59eca122d51fce258c702147c288f5e211b5f075.webp",
+    "https://statics.pancake.vn/web-media/97/da/85/a4/460110c44fd6a890f569db8aac5c5c70b997c9f5201a3496c8c1ab2d.webp",
+    "https://statics.pancake.vn/web-media/db/37/44/78/86a8d2b7b66f8205f89c5a94209ca2e2efd0093026ec166a9274fb5b.webp",
+    "https://statics.pancake.vn/web-media/0a/6b/db/04/23d14f48b7849c2a2c703990bac0d2568cf1959b0d24f966d4f3ebbb.webp"
+  ],
+  "/saw-makita-199v-20cm": [
+    "https://statics.pancake.vn/web-media/3a/cb/d9/c8/2c663726ac9daf4f30890b0b4019feed509abc55e44bd24b1e6afeda.jpg",
+    "https://statics.pancake.vn/web-media/67/d7/5f/81/b75ac08d99256d416c03cf72829716bbfa68ba8955361857e85aae3e.jpg",
+    "https://statics.pancake.vn/web-media/1b/ec/42/f4/85bb8b1fc7b00dc70140bd5a5b82bf312bdb550106e665c48d33ed8d.jpg",
+    "https://statics.pancake.vn/web-media/14/ee/1f/04/d76070b5af88bdd4bdd2db65549da28efc76ef5ad4266a6a027ae4df.jpg",
+    "https://statics.pancake.vn/web-media/3b/b8/cd/af/75bf53dae3089509be83c5b9fb21b7144c851437e5822d80d75227e7.jpg",
+    "https://statics.pancake.vn/web-media/d1/79/07/fc/e5953b180384058007054eb8698e3db7ecdf7218c7aee580f5f7ab87.jpg",
+    "https://statics.pancake.vn/web-media/7e/16/26/12/01dfc242c56b0bcbc97eb387e12015d71548d1d98853f899afba8bb4.jpg",
+    "https://statics.pancake.vn/web-media/a2/62/53/6c/792d67ce967f9644185fdeda14d91a3548ec60ea8f8f57c97f8d96cc.jpg",
+    "https://statics.pancake.vn/web-media/15/30/9d/f2/7b8471d822394fa2aa11d9d8f962b20a0b9c9c682daed8ee4b05ef6a.jpg"
+  ],
+  "/drill-makita-72v": [
+    "https://statics.pancake.vn/web-media/95/56/03/b6/6daa31af2fdf08ba805cf13968f616521f4dfee703d8a8fc67b0af93.jpg",
+    "https://statics.pancake.vn/web-media/00/aa/df/64/74ef51004b29b6c0f419c927e56ab387ea1ccac9fb36ee4f9705765d.jpg",
+    "https://statics.pancake.vn/web-media/a2/4a/1a/a0/d1b23a77b54b0a1f2bec86a7e78e4d4111e0a570749d199c1b649fd6.jpg",
+    "https://statics.pancake.vn/web-media/bb/39/ed/02/e33ddf0a023b08af17ff194d75274f7205496fc7375ead5026c3a290.jpg",
+    "https://statics.pancake.vn/web-media/a8/45/cf/04/8b46f51f26589bf89d1e959590fac726bafc2e734223700b46217849.jpg",
+    "https://statics.pancake.vn/web-media/55/86/07/5e/332c601691a9c14644dd8e125dc290d5abeab23085ebd72eeaff2606.jpg",
+    "https://statics.pancake.vn/web-media/d7/c0/74/6c/050040cf02499a4fd6adab32d25d72ac265af340afcc63557211b5d1.jpg",
+    "https://statics.pancake.vn/web-media/21/59/c3/7f/80ff481ef34d50ec27d118caeee644601177ed82ef3921bbae3e41b0.jpg",
+    "https://statics.pancake.vn/web-media/4a/83/61/be/4570a8bb6c5c46d3d60c74ae363cb99fc84c933d76eb2ddd7b2f13f3.jpg"
+  ],
+  "/drill-bosch-72v": [
+    "https://statics.pancake.vn/web-media/6f/df/a7/41/7cc83fe4211014870f04e44a7abb667de01587ee4b29b317e884e17a.jpg",
+    "https://statics.pancake.vn/web-media/a8/cc/3b/0d/6247838a483ea44edcfee4c81f010a211dd429a6e8d2e565134e3801.jpg",
+    "https://statics.pancake.vn/web-media/12/d7/88/a8/e890d1f59d13de0ec599114c4d092d9eb41f5f14d16f5c936c3cf53a.jpg",
+    "https://statics.pancake.vn/web-media/4a/83/61/be/4570a8bb6c5c46d3d60c74ae363cb99fc84c933d76eb2ddd7b2f13f3.jpg",
+    "https://statics.pancake.vn/web-media/bd/46/3b/85/bf274c4a7a63c9c932baf93b4f18f8d2feee0937b687f9b46eac3d43.jpg",
+    "https://statics.pancake.vn/web-media/10/0a/50/fa/d1aa59debbf4c294f4e50120de7b0de48cdb7da6e79dcf78c06f9595.jpg",
+    "https://statics.pancake.vn/web-media/0c/b8/c3/54/7a1bd3bc66eb7ef789ffec62a2964eb119f23f68d907bd725619a273.jpg"
+  ],
+  "/fan-boshun-199v": [
+    "https://statics.pancake.vn/web-media/08/34/5f/f7/cec67bca421b9830023e7bec832bf64c616a4d6737c17cbe57663ccd.webp",
+    "https://statics.pancake.vn/web-media/ec/f2/6a/24/b5813944cce0dcdbe26b3adc22fa346153c7a501dea65de0fa0802e7.webp",
+    "https://statics.pancake.vn/web-media/d8/fc/13/cc/202eb7b6682258c83f9ee1b7a32eeab1ced5b1a944358ceb7453fe4c.webp",
+    "https://statics.pancake.vn/web-media/35/c2/b9/10/b4c1df9093cc37d33ec0cff1335fe9c756b18838d886766492b30cab.webp",
+    "https://statics.pancake.vn/web-media/6a/b0/0e/8f/437a9181ac7f824a15577aec8c4c9a3b688b85df212d8e42fa3b4a5f.webp",
+    "https://statics.pancake.vn/web-media/4e/be/65/00/45b36891d98ad88c1ef670d7b04a07e82bfd3d3cf08b6b2ff82cf7aa.webp",
+    "https://statics.pancake.vn/web-media/0d/62/a9/a0/96d37fcdb1f79afb07d246872c310b530d8b70403ef5242f74ff859c.webp"
+  ],
+  "/lawn-mover-lapusen-36v": [
+    "https://statics.pancake.vn/web-media/21/18/56/2a/e5e1b811e87cd4632393dc5bcd3d7a52a311d5adc180a9302c5c7ff4.jpg",
+    "https://statics.pancake.vn/web-media/80/76/02/ee/6f01a2c55f001c68bd05000ec7999cc31aa6768f5e7191a53801e0d9.jpg",
+    "https://statics.pancake.vn/web-media/25/a3/67/ee/837a80a444c4129d12c1c43543af250c2903954cdb1b00edb49c2dd2.jpg",
+    "https://statics.pancake.vn/web-media/06/b0/81/31/6adeb0253817733f42aee3fe4376b19e42654c1d22953aa6e9fd469d.jpg",
+    "https://statics.pancake.vn/web-media/75/55/b8/9e/fd50fdc90a42a7b252ed5ec477831d9fa6b969d257f6f917e6208c47.jpg",
+    "https://statics.pancake.vn/web-media/ef/3b/e0/a8/3c5f1c480dc2427131090097eda0901e054e7de49a824b8b821de7e2.jpg",
+    "https://statics.pancake.vn/web-media/23/05/cd/0c/1f46b1a21aa4f3120fe440d3f6e86bfe3f512c118d9afae0aa7d4ae8.jpg",
+    "https://statics.pancake.vn/web-media/7f/ab/6f/4d/e9be6f4384febcba1823e15f2bd2696025fceed44809865b69a8ac49.jpg",
+    "https://statics.pancake.vn/web-media/a3/e2/0b/2b/49baaa4eba1aa4041fcbc79bcb565ebd071c7e0dbe97e315e0f23705.jpg",
+    "https://statics.pancake.vn/web-media/f6/60/94/02/b6b858bf5482903351ad024e9fd34fbec68e8dda56ecc0a241ccdbc6.jpg"
+  ],
+  "/wrench-hitachi-199v": [
+    "https://statics.pancake.vn/web-media/2e/e3/56/0d/c4a095455a316a926f4d7a596682e76ed5019b45507858d4059ef97c.jpg",
+    "https://statics.pancake.vn/web-media/c7/63/d8/29/d3a51e80fa404c4e9aed16e556ed9865e628bfb38dc88e649531f769.jpg",
+    "https://statics.pancake.vn/web-media/ce/b7/ee/df/f0640e149876c86e5051c1d2f3e4e348dcbeb0a22728be118d96bed1.jpg",
+    "https://statics.pancake.vn/web-media/36/49/e4/c1/e766f6855cd25699fa7126ba21ff75da67e39b6d6e1585d05df6ca95.jpg",
+    "https://statics.pancake.vn/web-media/da/33/1d/35/97b1ad98f39529b6338e29c6b73d78978743383370bc99529a951787.jpg",
+    "https://statics.pancake.vn/web-media/7b/9f/68/dc/823bb160757c7171a29b833cfa640f0b46a6ffce804207053bbe04f9.jpg",
+    "https://statics.pancake.vn/web-media/b1/7e/19/45/0d9061f08343696c7771c3878ecc7d480b425e3635a28a297e1618e2.jpg",
+    "https://statics.pancake.vn/web-media/40/63/ec/d4/eb596d2a395fae13623060734cdcb0f0ae0afa65e17299a0be1f0b43.jpg",
+    "https://statics.pancake.vn/web-media/81/2b/ae/27/491ef2db973552a23cdcf12b095cd055da56e91d3fd2d578b1317498.jpg",
+    "https://statics.pancake.vn/web-media/01/48/67/62/f0e2134aadce4227daf37737eca6455c3928018bfeb705d3f4a61343.jpg",
+    "https://statics.pancake.vn/web-media/f9/ff/7c/67/8e62f1d4d63c25cac44354bb383e00a0d417f89a62154d92a1f4bc96.jpg",
+    "https://statics.pancake.vn/web-media/91/6f/00/1e/b9120edd2b44bafaf66d5f8971b54ab39030f867bb4ea8d4dc0b7058.jpg",
+    "https://statics.pancake.vn/web-media/6a/6a/fc/c3/9b1d721e8ee377679b4800427ebb537882e7d8602a43916ba9257c5a.jpg",
+    "https://statics.pancake.vn/web-media/1c/bd/32/55/c221c5f9a2a54933759664f2a2877e9bcef362792caaaa2704b8a4b5.jpg",
+    "https://statics.pancake.vn/web-media/d6/ed/ec/a5/912a0d52911952f54d2d11e6138ff5624e4b352645c18e8926b6865f.jpg"
+  ],
+  "/wrench-makita-20v": [
+    "https://statics.pancake.vn/web-media/af/74/6b/e8/968562a9382b63ef2cbe7554231c0742fd984c2f25d0eab106b66951.jpg",
+    "https://statics.pancake.vn/web-media/07/74/bb/a7/66fd59cc2cf77ffbf3d30bbc102a8a25669534e50685da010b924ef2.jpg",
+    "https://statics.pancake.vn/web-media/07/5d/56/fc/faf95a74a3ad7bc2c966f214f8c5d632f8ee0f8bc2841430e78aa914.jpg",
+    "https://statics.pancake.vn/web-media/d7/89/e2/f1/a4e84284702d55ae24139066b75ea509408dae4419134ee4a6667e1c.jpg",
+    "https://statics.pancake.vn/web-media/7e/6b/8e/7d/a6ce8c6437d583eb927516c5fce27b19cf34ec30805a613f64a03fc0.jpg",
+    "https://statics.pancake.vn/web-media/2d/1f/84/22/dc4a4378740bfb9ebc8cf6148533ef4da7362150d8b91b2ec04f9f3b.jpg",
+    "https://statics.pancake.vn/web-media/ba/85/c0/b2/a84ad3e68211a78b7eeebb666d58b2bed521578672c4bc538ad49d41.jpg",
+    "https://statics.pancake.vn/web-media/6e/cf/77/aa/11af57bf5119b82086b1fd2bce87dd2ae8781a01ee78db4dafe33072.jpg",
+    "https://statics.pancake.vn/web-media/d3/20/59/82/9346babe7f82c83b5cbd8435ee06ce71c3fa56d3bdf6ef89b65ef202.jpg",
+    "https://statics.pancake.vn/web-media/83/08/91/30/eaba455aa40936bca58ee2b6c0b8a3f690bc6405beb0f4a14ee4399b.jpg",
+    "https://statics.pancake.vn/web-media/b6/5d/86/96/0410e0906876110b71d200716e9b02d129fdd753bddb3cebc78f3bf8.jpg",
+    "https://statics.pancake.vn/web-media/1c/c2/05/ba/bc7299272f970e21e2a80d926db54bcc9e9b5b8548613190fd588d3b.jpg"
+  ]
+};
+        let _review_response = [
+    "Dạ vâng em cảm ơn anh ạ!",
+    "Dạ em cảm ơn anh ạ!",
+    "Dạ em cảm ơn anh đã ủng hộ ạ!",
+    "Dạ shop xin cảm ơn anh nhiều ạ!",
+    "Dạ vâng ạ, em cảm ơn anh ạ!",
+    "Cảm ơn anh đã tin tưởng sử dụng sản phẩm ạ!",
+    "Dạ vâng em cảm ơn anh ạ!",
+    "Dạ em cảm ơn anh ạ!",
+    "Dạ em cảm ơn anh đã ủng hộ ạ!",
+    "Dạ shop xin cảm ơn anh nhiều ạ!",
+    "Dạ vâng ạ, em cảm ơn anh ạ!",
+    "Cảm ơn anh đã tin tưởng sử dụng sản phẩm ạ!",
+    "Dạ vâng em cảm ơn anh ạ!",
+    "Dạ em cảm ơn anh ạ!",
+    "Dạ em cảm ơn anh đã ủng hộ ạ!",
+    "Dạ shop xin cảm ơn anh nhiều ạ!",
+    "Dạ vâng ạ, em cảm ơn anh ạ!",
+    "Cảm ơn anh đã tin tưởng sử dụng sản phẩm ạ!",
+    "Dạ vâng em cảm ơn anh ạ!",
+    "Dạ em cảm ơn anh ạ!",
+    "Dạ em cảm ơn anh đã ủng hộ ạ!",
+    "Dạ shop xin cảm ơn anh nhiều ạ!",
+    "Dạ vâng ạ, em cảm ơn anh ạ!",
+    "Cảm ơn anh đã tin tưởng sử dụng sản phẩm ạ!",
+    "Dạ vâng em cảm ơn anh ạ!",
+    "Dạ em cảm ơn anh ạ!",
+    "Dạ em cảm ơn anh đã ủng hộ ạ!",
+    "Dạ shop xin cảm ơn anh nhiều ạ!",
+    "Dạ vâng ạ, em cảm ơn anh ạ!",
+    "Cảm ơn anh đã tin tưởng sử dụng sản phẩm ạ!",
+    "Dạ vâng em cảm ơn anh ạ!",
+    "Dạ em cảm ơn anh ạ!",
+    "Dạ em cảm ơn anh đã ủng hộ ạ!",
+    "Dạ shop xin cảm ơn anh nhiều ạ!",
+    "Dạ vâng ạ, em cảm ơn anh ạ!",
+    "Cảm ơn anh đã tin tưởng sử dụng sản phẩm ạ!",
+    "Dạ vâng em cảm ơn anh ạ!",
+    "Dạ em cảm ơn anh ạ!",
+    "Dạ em cảm ơn anh đã ủng hộ ạ!",
+    "Dạ shop xin cảm ơn anh nhiều ạ!",
+    "Dạ vâng ạ, em cảm ơn anh ạ!",
+    "Cảm ơn anh đã tin tưởng sử dụng sản phẩm ạ!"
+];
+        let _review_text = [
+  "Sản phẩm ổn đấy shop",
+  "Sản phẩm đúng quảng cáo, giao hàng nhanh, cảm ơn shop đã tư vấn nhiệt tình",
+  "Đẹp, gọn, tiện , chạy khỏe, ưng ý",
+  "Giao hàng nhanh quá, mới đặt sáng chiều nhận luôn được, sản phẩm chất lượng",
+  "Hàng y như quảng cáo, mọi người nên mua, vừa tầm giá",
+  "Sp thấy ok, dùng lâu dài thì chưa biết thế nào. Shop uy tín, sẽ ủng hộ thêm",
+  "Anh nhân được hàng rồi, hài lòng",
+  "Anh nhân hàng rồi nhé, cảm ơn em",
+  "Shop uy tín, gửi hàng đúng quảng cáo, sẽ ủng hộ thêm",
+  "Khá hài lòng về cách phục vụ và sản phẩm của shop",
+  "Cảm ơn em, anh nhận được hàng rồi",
+  "Pin trâu, máy chắc chắn",
+  "Sản phẩm đúng mô tả, shop thiện chí",
+  "Máy khỏe, rất tiện",
+  "Đóng gói cẩn thận, chắc chắn, sản phẩm tốt",
+  "5 sao cho shop",
+  "Lực khỏe, anh giới thiệu thêm mấy anh em bạn bè rồi, cảm ơn em nha",
+  "Chất lượng tốt",
+  "Hài lòng",
+  "Mình nhận hàng rồi, cảm ơn bạn đã tư vấn",
+  "Búa đập khỏe, lực máy đúng mô tả",
+  "Anh ủng hộ thêm bộ nữa, máy trước mua dùng thấy tốt",
+  "Ưng ý"
+];
+        let _profile_link = [
+    "https://www.facebook.com/profile.php?id=100092008704764",
+    "https://www.facebook.com/khanhvipuuuuu",
+    "https://www.facebook.com/n.thuanann",
+    "https://www.facebook.com/phuc26122001",
+    "https://www.facebook.com/profile.php?id=100090459323018",
+    "https://www.facebook.com/dunksayhi",
+    "https://www.facebook.com/profile.php?id=100054679162753",
+    "https://www.facebook.com/dinhanhdayne",
+    "https://www.facebook.com/profile.php?id=100040755279126",
+    "https://www.facebook.com/profile.php?id=100087123045458",
+    "https://www.facebook.com/profile.php?id=100041600300794",
+    "https://www.facebook.com/minhchauxinh220802",
+    "https://www.facebook.com/profile.php?id=100083060095276",
+    "https://www.facebook.com/trlinh.0212",
+    "https://www.facebook.com/profile.php?id=100026235882517",
+    "https://www.facebook.com/profile.php?id=100045231743160",
+    "https://www.facebook.com/tranthinh193",
+    "https://www.facebook.com/profile.php?id=100089858978294",
+    "https://www.facebook.com/profile.php?id=100055091365028",
+    "https://www.facebook.com/profile.php?id=100041584903472",
+    "https://www.facebook.com/profile.php?id=100069679432976",
+    "https://www.facebook.com/sen.vu.31586",
+    "https://www.facebook.com/cau.cang.98",
+    "https://www.facebook.com/khodemdangphuong",
+    "https://www.facebook.com/profile.php?id=100002599368229",
+    "https://www.facebook.com/trongnghia.do.961",
+    "https://www.facebook.com/tang.vicong",
+    "https://www.facebook.com/profile.php?id=100076984596077",
+    "https://www.facebook.com/dong.skun.98",
+    "https://www.facebook.com/chienducchien.mai",
+    "https://www.facebook.com/profile.php?id=100087737066262",
+    "https://www.facebook.com/tuanninh1405",
+    "https://www.facebook.com/nhoxkute.pro.31",
+    "https://www.facebook.com/pho.hao.71",
+    "https://www.facebook.com/mun.tran.948494",
+    "https://www.facebook.com/haiha.sweetie"
+];
+
+function createThread(path) {
+    let library = {
+        avatar: Object.assign( {}, _avatar),
+        buy_response: Object.assign( {}, _buy_response),
+        buy_text : Object.assign( {}, _buy_text),
+        review_image : Object.assign( {}, _review_image[path]),
+        review_response : Object.assign( {}, _review_response),
+        review_text : Object.assign( {}, _review_text),
+        profile_link : Object.assign( {}, _profile_link)
+
+    }
+    function Random(obj) {
+        let _obj = Object.fromEntries(Object.entries(library[obj]));
+        let index = Math.round( Math.random()*(Object.keys(_obj).length-1) );
+        let value = _obj[index];
+        delete _obj[index];
+        library[obj] = Object.values(_obj);
+        console.log(_obj);
+        return value; 
+    }
+    let time = 28;
+    let uptime = 18
+    function createComment() {
+        let _avatar = Random("avatar");
+        time += Math.round(Math.random() * uptime + 1);
+        uptime += Math.random() * uptime
+        let comment = {
+            thumbnail: _avatar[1],
+            name: _avatar[0],
+            link: Random("profile_link"),
+            time: (time < 60) ? `${time} phút` : `${Math.floor( time /60)} giờ`,
+        };
+        time += Math.round(Math.random() * 8 + 1);
+        if ( Math.random() > 0.5 ){
+            comment["text"] = Random("review_text");
+            let new_review_image = Random("review_image");
+            if ( new_review_image) {
+                comment["media"] = new_review_image;
+            };
+            comment["replies"] = [{
+                text: Random("review_response"),
+                time: (time < 60) ? `${time} phút` : `${Math.floor( time /60)} giờ`,
+            }]
+        } else {
+            comment["text"] = Random("buy_text");
+            comment["replies"] = [{
+                text: Random("buy_response"),
+                time: (time < 60) ? `${time} phút` : `${Math.floor( time /60)} giờ`,
+            }]
+        };
+        return comment;
+    };
+
+    return ({
+        isDisplay: true,
+        icon_url: "https://w.ladicdn.com/s250x250/5b39a35979c7e420514fbfc4/icon-fb-20200627185646.png",
+        reaction_amount: `${Random("avatar")[0]} và ${ 12342 + Math.round( Math.random() * 5000)} người khác`,
+        comment_amount: `${ 8234 + Math.round( Math.random() * 3000)} Bình Luận`,
+        comment_wait: "Ai đó đang nhập bình luận...",
+        fanpge_name: "Cơ Khí Nhập Khẩu",
+        fanpage_link: "https://www.facebook.com/profile.php?id=100079822181597",
+        fanpage_thumbnail: "https://statics.pancake.vn/web-media/0a/ad/4c/09/d7a30b72e6de59e301b37f3079558d8803d4ad0a286970a359bdb05e.jpg",
+
+        comments:  [... Array(Math.round( Math.random() * 2) + 5).keys()].map( () => {
+            let comment = createComment();
+            if (Math.random() > 0.5 ) {
+                let addCommentReply = createComment();
+                let replyAddCommentreply = addCommentReply.replies[0];
+                delete addCommentReply.replies;
+                comment.replies.push(addCommentReply)
+                comment.replies.push(replyAddCommentreply)
+            }
+            return comment;
+    })})
+};
+if (_review_image.hasOwnProperty(__req.path)) {
+    data_comment = createThread(__req.path);
+}
+    %>
+    <script>
+            window["CommentState"] = Object.assign( window["CommentState"] || {}, <%- JSON.stringify(data_comment) %>, { isDisplay: <%- _review_image.hasOwnProperty(__req.path) %>} );
+    </script>
+    <div id="dudu-comment"></div>
+    <script src="/comment.js"></script>
+    <footer>
+        <div style="display: flex; justify-content: space-between; flex-wrap: wrap; width: 100%;">
+            <div id="short-policy">
+                <div>
+                    <div>
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 68 68" style="enable-background:new 0 0 68 68;" xml:space="preserve" preserveAspectRatio="none" width="100%" height="100%" class="" fill="#024d82"><g><path d="M8.1177368,4.1542983H4.0039063v4.1142583C6.0771484,7.8623061,7.7115479,6.2276626,8.1177368,4.1542983z"></path><path d="M4.0039063,16.2612324v4.121582h4.114563C7.7147217,18.3061543,6.0795288,16.6679096,4.0039063,16.2612324z"></path><path d="M38.0874023,18.5395527c-0.4116211,0-0.8188477-0.0797119-1.2039185-0.2175903   c-0.4517822,0.6177979-0.7756958,1.3125-0.9204102,2.0608521h4.1233521V18.302309l-1.5141602,0.2079468   C38.425293,18.5351582,38.2641602,18.5395527,38.0874023,18.5395527z"></path><path d="M35.2509766,17.1318378c-0.0604858-0.0799561-0.1119995-0.1658325-0.1653442-0.2504883   c-0.017334-0.0275879-0.0370483-0.0533447-0.0537109-0.0813599c-0.1064453-0.1799316-0.1940308-0.3702393-0.267395-0.567688   c-0.0160522-0.0432129-0.0299072-0.0869141-0.0443115-0.1308594c-0.0673828-0.2056274-0.12323-0.4162598-0.1533203-0.6361084   c-0.128418-0.9379883,0.1181641-1.8710938,0.6943359-2.6264648c0.5756836-0.7558594,1.4111328-1.2421875,2.3520508-1.3696289   l2.4731445-0.3408203v-0.8273926c-3.1808472-0.4429932-5.7047119-2.9663701-6.1490479-6.146729H10.1495361   c-0.4442139,3.1793213-2.9663086,5.7019048-6.1456299,6.1461186v3.9289551   c3.1806641,0.444397,5.7037964,2.96875,6.1464844,6.1500244h23.7861328   C34.0996094,19.2021503,34.5493164,18.0908222,35.2509766,17.1318378z M14.987793,13.26758h-1.6542969   c-0.5522461,0-1-0.4477539-1-1s0.4477539-1,1-1h1.6542969c0.5522461,0,1,0.4477539,1,1S15.5400391,13.26758,14.987793,13.26758z    M22.0449219,18.0185566c-3.1708984,0-5.7504883-2.5800781-5.7504883-5.7509766s2.5795898-5.7504888,5.7504883-5.7504888   s5.7509766,2.5795903,5.7509766,5.7504888S25.2158203,18.0185566,22.0449219,18.0185566z M30.7568359,13.26758h-1.6010742   c-0.5522461,0-1-0.4477539-1-1s0.4477539-1,1-1h1.6010742c0.5522461,0,1,0.4477539,1,1S31.309082,13.26758,30.7568359,13.26758z"></path><path d="M22.0449219,8.5170918c-2.0678711,0-3.7504883,1.6826172-3.7504883,3.7504883   c0,2.0683594,1.6826172,3.7509766,3.7504883,3.7509766c2.0683594,0,3.7509766-1.6826172,3.7509766-3.7509766   C25.7958984,10.1997089,24.1132813,8.5170918,22.0449219,8.5170918z"></path><path d="M60.5825195,6.0820327v0.5844727v11.2089844v0.5844727H64V6.0820327H60.5825195z M62.4775391,16.5947285   c-0.5522461,0-1.0048828-0.453125-1.0048828-1.0053711s0.4526367-1.0048828,1.0048828-1.0048828   s1.0048828,0.4526367,1.0048828,1.0048828S63.0297852,16.5947285,62.4775391,16.5947285z"></path><path d="M48.8266602,6.6108413c-2.1844482-0.7736206-4.552124-0.8081055-6.7402344-0.1246338v2.8790898   c0,0.001709,0.0009766,0.0031128,0.0009766,0.0048218v1.4838257l3.5439453-0.4848022   c0.5454102-0.0776367,1.0512695,0.3076172,1.1264648,0.8549805c0.074707,0.5473633-0.3081055,1.0517578-0.8549805,1.1264648   l-4.678833,0.6400146l-0.0003662,0.0001221l-3.3398438,0.4599609c-0.4140625,0.0561523-0.779789,0.269043-1.0322266,0.6000977   c-0.2509766,0.3300781-0.3588867,0.7358398-0.3032227,1.1435547c0.059021,0.4313354,0.286499,0.8085938,0.6400146,1.0614624   l0.0001221,0.000061c0.2783203,0.1992188,0.6455078,0.2836914,0.980957,0.284668   c0.0341797,0,0.0683594-0.0014648,0.1035156-0.0073242l8.0371094-1.1044922   c0.3027344-0.0444336,0.6132813,0.059082,0.8349609,0.2749023c1.989502,1.9421997,4.038269,2.0823975,7.8579102,0.5218506   V8.5415668c-1.0499268-0.0953979-1.767334-0.3477173-2.7963867-0.7153935L48.8266602,6.6108413z"></path><path d="M40.0864258,8.2688618V4.1542983h-4.1171875C36.3756714,6.2285781,38.0117798,7.8636489,40.0864258,8.2688618z"></path><polygon points="57.0029297,16.8729877 57.003479,16.8754902 58.5825195,16.8754902 58.5825195,7.6665053 57.0029297,7.6665053     "></polygon><path d="M8.3457031,48.847168H4.1879883C4.0844727,48.847168,4,48.9316406,4,49.0351563v13.6142578   c0,0.1035156,0.0844727,0.1879883,0.1879883,0.1879883h4.1577148c0.1035156,0,0.1879883-0.0844727,0.1879883-0.1879883v-1.7266235   c0-0.0025635-0.0014648-0.0046997-0.0014648-0.0072632s0.0014648-0.0046997,0.0014648-0.0072632V49.0351563   C8.5336914,48.9316406,8.4492188,48.847168,8.3457031,48.847168z"></path><path d="M38.4174805,54.3354492c-0.1762695-0.0634766-0.3666992-0.0556641-0.5380859,0.0244141   c-0.0405273,0.019043-0.0825195,0.0351563-0.125,0.0483398l-9.8851318,3.0941162   c-0.0383301,0.0159912-0.0795288,0.0228882-0.1185303,0.0370483l-0.2766113,0.0866089   c-0.0048828,0.0015259-0.0097046,0.000061-0.0145874,0.0015259c-0.2050171,0.0490112-0.4141235,0.0819702-0.6289673,0.0819702   h-5.9262695c-0.7587891,0-1.3759766,0.6171875-1.3759766,1.3759766v0.3818359c0,0.5522461-0.4477539,1-1,1s-1-0.4477539-1-1   v-0.3818359c0-1.8613281,1.5146484-3.3759766,3.3759766-3.3759766h5.9262695c0.0695801,0,0.135376-0.0206909,0.2011108-0.0402832   l0.0969238-0.0303345c0.0769653-0.0355835,0.1505737-0.0804443,0.2136841-0.1422729   c0.1118164-0.1142578,0.1865234-0.2788086,0.1972656-0.4511719c0.0141602-0.21875-0.0932617-0.3813477-0.1855507-0.4799805   c-0.1591759-0.1699219-0.3930626-0.2714844-0.6254845-0.2714844h-5.5170898c-0.1171875,0-0.2333984-0.0205078-0.3432617-0.0610352   l-4.7905273-1.7514648c-1.003418-0.3666992-2.0546875-0.5527344-3.1240234-0.5527344h-2.4199219v7.9868164h1.1049805   c0.5327148,0,1.0507813,0.090332,1.5400391,0.269043l10.0639648,3.5839844   c0.3779297,0.1308594,0.7973633,0.0947266,1.1455078-0.1044922l14.015625-7.984375   c0.277832-0.1337891,0.3793945-0.2963867,0.4282227-0.4160156c0.0053711-0.0141602,0.0117188-0.027832,0.0180664-0.0415039   c0.0541992-0.1811523,0.0419922-0.3618164-0.0307617-0.5141602C38.7358398,54.5292969,38.5942383,54.3999023,38.4174805,54.3354492   z"></path><path d="M35.2285156,36.3544922l2.03125-1.6625977c0.184082-0.1508789,0.4086914-0.2260742,0.6333008-0.2260742   s0.4492188,0.0751953,0.6333008,0.2260742l2.0317383,1.6625977V29.196291h-5.3295898V36.3544922z"></path><path d="M42.5581055,38.465332c0,0.3862305-0.2226563,0.7382813-0.5717773,0.9038086   c-0.1367188,0.0644531-0.2827148,0.0961914-0.4282227,0.0961914c-0.2265625,0-0.4511719-0.0771484-0.6333008-0.2260742   l-3.0317383-2.4814453l-3.03125,2.4814453c-0.2993164,0.2446289-0.7128906,0.2939453-1.0615234,0.1298828   c-0.3491211-0.1655273-0.5717773-0.5175781-0.5717773-0.9038086V29.196291h-9.1845703v18.2485332h27.6982422V29.196291h-9.184082   V38.465332z"></path></g></svg>
+                        <span>Thanh toán khi nhận hàng (COD)</span>
+                    </div>
+                    <div>
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 48 48" enable-background="new 0 0 48 48" xml:space="preserve" preserveAspectRatio="none" width="100%" height="100%" class="" fill="#024d82"><g><path d="M39.4,4.8H1.3c-0.4,0-0.8,0.3-0.8,0.8v26.2c0,0.4,0.3,0.8,0.8,0.8h22.5c0-0.1,0-0.1,0-0.2   c0-7.1,5.8-12.9,12.9-12.9c1.2,0,2.4,0.2,3.5,0.5V5.6C40.2,5.2,39.8,4.8,39.4,4.8z M6,14.1h6.2v6.5H6V14.1z M11.6,28.9H6   c-0.6,0-1-0.5-1-1c0-0.6,0.5-1,1-1h5.6c0.6,0,1,0.5,1,1C12.7,28.5,12.2,28.9,11.6,28.9z M21.7,28.9h-5.6c-0.6,0-1-0.5-1-1   c0-0.6,0.5-1,1-1h5.6c0.6,0,1,0.5,1,1C22.7,28.5,22.2,28.9,21.7,28.9z M34.7,10.5h-9.3c-0.6,0-1-0.5-1-1c0-0.6,0.5-1,1-1h9.3   c0.6,0,1,0.5,1,1C35.7,10.1,35.2,10.5,34.7,10.5z"></path><path d="M36.7,21.5c-6,0-10.8,4.9-10.8,10.8c0,6,4.9,10.8,10.8,10.8c6,0,10.8-4.9,10.8-10.8   C47.5,26.4,42.6,21.5,36.7,21.5z M36.2,31.1c0.1,0.2,0.4,0.4,0.8,0.6c0.9,0.4,1.5,0.8,1.9,1.3s0.6,1.1,0.6,1.8   c0,0.8-0.2,1.4-0.6,1.8c-0.4,0.5-1,0.7-1.7,0.8v1.3h-1v-1.3c-0.7-0.1-1.3-0.4-1.8-0.9c-0.5-0.5-0.7-1.3-0.7-2.2h1.9   c0,0.6,0.1,1,0.3,1.3c0.2,0.3,0.5,0.4,0.8,0.4c0.3,0,0.5-0.1,0.6-0.3c0.1-0.2,0.2-0.5,0.2-0.9c0-0.4-0.1-0.7-0.2-0.9   c-0.1-0.2-0.4-0.4-0.8-0.6c-0.9-0.4-1.5-0.8-1.9-1.2c-0.4-0.4-0.6-1.1-0.6-1.9c0-0.7,0.2-1.3,0.6-1.8c0.4-0.5,1-0.8,1.7-0.8v-1.4h1   v1.4c0.7,0.1,1.2,0.5,1.6,1c0.4,0.5,0.6,1.2,0.6,2.1h-1.9c0-0.5-0.1-0.9-0.2-1.2C37.2,29.2,37,29,36.8,29c-0.3,0-0.5,0.1-0.6,0.3   c-0.1,0.2-0.2,0.5-0.2,0.9C36,30.6,36.1,30.9,36.2,31.1z"></path></g></svg>
+                        <span>Chuyển khoản ngân hàng</span>
+                    </div>
+                </div>
+                <div>
+                    <div>
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 64 64" style="enable-background:new 0 0 64 64;" xml:space="preserve" preserveAspectRatio="none" width="100%" height="100%" class="" fill="#024d82"><path d="M14.3,14c1.4,0.4,2.6,1.2,3.5,2.3l0,0c0.5,0.7,1,1.6,1.2,2.4c0.6-2.3,2.4-4.1,4.7-4.7c-2-0.5-3.7-2-4.4-3.9l0,0c0,0,0,0,0,0  c-0.1-0.2-0.2-0.5-0.3-0.7C18.4,11.6,16.6,13.4,14.3,14z"></path><path d="M45.3,50c1.4,0.4,2.6,1.2,3.5,2.3l0,0c0.5,0.7,1,1.6,1.2,2.4c0.6-2.3,2.4-4.1,4.7-4.7c-2-0.5-3.7-2-4.4-3.9l0,0c0,0,0,0,0,0  c-0.1-0.2-0.2-0.5-0.3-0.7C49.4,47.6,47.6,49.4,45.3,50z"></path><path d="M45.9,52.4c-1.6-0.8-3.3-1.3-5.1-1.5c-0.1,0-0.1,0-0.2-0.1c-2.4,1.7-4.9,3-7.7,3.9C32.6,54.9,32.3,55,32,55  c-0.3,0-0.7-0.1-1-0.2c-4.8-1.6-9.1-4.5-12.5-8.2c-8-8.8-8.8-20.4-8.5-26.5c0.1-1.4,1-2.5,2.3-2.9c0.9-0.2,1.8-0.5,2.7-0.7  c-1.6-0.8-3.4-1.3-5.2-1.5c-0.4-0.1-0.7-0.4-0.8-0.7c-0.6,0.1-1.1,0.2-1.7,0.3c-0.4,0.1-0.8,0.4-0.8,0.8c-0.8,5-2.3,22.1,9,34.6  c4.4,4.7,10,8.2,16.2,10c0.2,0.1,0.3,0.1,0.5,0C37.3,58.5,42,55.9,45.9,52.4z"></path><path d="M21.5,10.1c0.7,1.2,1.9,1.8,3.8,2.3c1.8-0.9,3.5-1.9,5.1-2.9c1-0.6,2.2-0.6,3.2,0c3.3,2.2,6.9,4,10.6,5.4  c2.4,1,4.9,1.7,7.5,2.4c1.3,0.3,2.3,1.5,2.3,2.8c0.2,4.7-0.2,12.5-3.9,19.9c0.5,0,0.8,0.4,0.9,0.8c0.2,1.5,0.6,2.9,1.1,4.3  c7.2-11.4,6.2-24.5,5.4-29.7c-0.1-0.4-0.4-0.8-0.8-0.8c-3.8-0.7-7.5-1.7-11-3.1C41,9.7,36.6,7.2,32.6,4.2c-0.3-0.3-0.8-0.3-1.2,0  C28.3,6.5,25,8.5,21.5,10.1z"></path><path d="M48.7,42.4c-0.9,1.5-2,2.9-3.2,4.3c-0.6,0.6-1.1,1.2-1.7,1.7C47,47.5,47.9,46.3,48.7,42.4z"></path><path d="M12,20.2c-0.3,5.8,0.4,16.9,7.9,25.1c3.2,3.5,7.2,6.1,11.7,7.6c0.2,0.1,0.4,0.1,0.6,0c4.5-1.5,8.5-4.2,11.7-7.6  c7.5-8.2,8.2-19.3,7.9-25.1c0-0.5-0.3-0.9-0.8-1c-2.6-0.7-5.2-1.5-7.7-2.5c-3.8-1.5-7.5-3.4-10.9-5.6c-0.3-0.2-0.7-0.2-1,0  c-1,0.7-2.1,1.3-3.2,1.9c0.4,0.1,0.7,0.5,0.7,0.9c0,0.5-0.3,0.9-0.8,1c-6.3,1.2-7,1.9-8.2,8.2c-0.1,0.5-0.6,0.9-1.2,0.8  c-0.4-0.1-0.7-0.4-0.8-0.8c-0.2-1.7-0.7-3.4-1.4-5.1c-1.2,0.4-2.5,0.8-3.7,1.1C12.4,19.3,12.1,19.7,12,20.2z M20.9,30.8l1.3-1.3  c1.2-1.2,3.2-1.2,4.4,0l3.4,3.5c0.4,0.4,1.2,0.4,1.6,0l9.8-10c0.6-0.6,1.4-0.9,2.2-0.9l0,0c0.8,0,1.6,0.3,2.2,0.9l1.3,1.3  c1.2,1.2,1.2,3.2,0,4.5L33,43.1c-1.2,1.2-3.2,1.3-4.4,0.1c0,0,0,0-0.1-0.1l-7.7-7.8C19.7,34,19.7,32,20.9,30.8z"></path><path d="M30,41.7c0.4,0.4,1.2,0.4,1.6,0l14.1-14.4c0.5-0.5,0.5-1.2,0-1.7l-1.3-1.3c-0.4-0.4-1.1-0.5-1.6,0c0,0,0,0,0,0l-9.8,10  c-1.2,1.2-3.2,1.2-4.5,0l-3.4-3.5c-0.4-0.4-1.2-0.4-1.6,0l-1.3,1.3c-0.5,0.5-0.5,1.2,0,1.7L30,41.7z"></path></svg>
+                        <span>30 ngày đổi trả miễn phí</span>
+                    </div>
+                    <div>
+                        <svg xmlns="http://www.w3.org/2000/svg" data-name="Layer 1" viewBox="0 0 100 100" x="0px" y="0px" preserveAspectRatio="none" width="100%" height="100%" class="" fill="#024d82"><title>02</title><g data-name="Group"><path data-name="Compound Path" d="M80.5,29.5H57.6V48.1H14.5V75.2h6.1a11.5,11.5,0,0,0,22,0H70a11.5,11.5,0,0,0,11,8.2,11.3,11.3,0,0,0,10.9-8.2h7.3l-.3-25ZM31.6,76.4A4.5,4.5,0,0,1,27.1,72a4.5,4.5,0,1,1,4.5,4.4Zm49.4,0A4.5,4.5,0,0,1,76.5,72,4.5,4.5,0,1,1,81,76.4Zm0-15.8a11.4,11.4,0,0,0-10.8,7.6H42.3a11.4,11.4,0,0,0-20.8-1.5V55.1H64.6V36.5H77.4L91.9,52.9l.2,15.3h-.4A11.3,11.3,0,0,0,81,60.6Z"></path><path data-name="Compound Path" d="M76.6,37.3H65.4V55.1H91.7ZM72.4,48.1V44.3h.9l3.3,3.8Z"></path><path data-name="Compound Path" d="M56.2,16.6H21V47.7H56.2Zm-18.3,7h0ZM49.2,40.7H28V23.6h2.9v7.1H46.2V23.6h3Z"></path><rect data-name="Path" x="4.6" y="19.6" width="14.9" height="7"></rect><rect data-name="Path" x="0.8" y="28.9" width="18.7" height="7"></rect><rect data-name="Path" x="4.6" y="38.3" width="14.9" height="7"></rect></g></svg>
+                        <span>Miễn phí vận chuyển toàn quốc</span>
+                    </div>
+                </div>
+            </div>
+            <div id="business-info">
+                <div>
+                    <div>
+                        <span>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                            </svg>
+                        </span>
+                        <span>Địa chỉ: <%- locals.shop_address -%></span>
+                    </div>
+                </div>
+                <a href="/">
+                    <div>
+                        <span>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                            </svg>
+                        </span>
+                        <span>Trang chủ: <%- __req.hostname -%></span>
+                    </div>
+                </a>
+                <a href="mailto:<%- locals.shop_email -%>">
+                    <div>
+                        <span>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                            </svg>
+                        </span>
+                        <span>Email: <%- locals.shop_email -%>;</span>
+                    </div>
+                </a>
+                <a href="tel:<%- locals.shop_phone -%>">
+                    <div>
+                        <span>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
+                            </svg>
+                        </span>
+                        <span>Hotline: <%- locals.shop_phone -%></span>
+                    </div>
+                </a>
+            </div>
+            <div id="business-policy">
+                <a href="/about">Về Chúng Tôi</a>
+                <a href="/terms-and-condition">Điều Khoản Và Điều Kiện</a>
+                <a href="/privacy-policy">Chính Sách Quyền Riêng Tư</a>
+                <a href="/billing-terms-and-condition">Điều Khoản Và Điều Kiện Thanh Toán</a>
+                <a href="/return-and-refund-policy">Chính Sách Trả Lại Hàng Và Hoàn Tiền</a>
+                <a href="/delivery-policy">Chính sách vận chuyển</a>
+                <a href="/frequently-questions">Câu hỏi thường gặp</a>
+                <a href="/help-center">Trung tâm trợ giúp</a>
+            </div>
+            <div id="payment-method">
+                <p style="margin: 0px; font-weight: 600;">Phương thức thanh toán:</p>
+                <div style="display: flex; justify-content: space-around;">
+                    <svg width="48" height="48" viewBox="0 0 32 33" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M2.17957 6.6665C3.05501 6.6665 3.76471 7.37619 3.76471 8.25164V8.54886H11.6637C12.8114 8.54886 13.3324 8.8915 14.2358 10.0787L15.8465 12.3136H30.2624C31.222 12.3136 32 13.1068 32 14.0852V25.6008C32 26.5792 31.222 27.3724 30.2624 27.3724H11.1493C10.1897 27.3724 9.41174 26.5792 9.41174 25.6008V20.3498H8.03056C7.20288 20.3498 6.41436 19.9729 5.68079 19.3563C5.51511 19.217 5.35997 19.0716 5.21619 18.924L4.96562 18.652L4.906 18.5825L3.73127 18.5832C3.58119 19.3026 2.94348 19.843 2.17957 19.843H1.58514C0.709691 19.843 0 19.1333 0 18.2578V8.25164C0 7.37619 0.709691 6.6665 1.58514 6.6665H2.17957ZM3.76471 17.6423H5.3697L5.542 17.8741L5.64335 17.9969C5.66442 18.0215 5.68754 18.048 5.71264 18.0762C5.88231 18.2671 6.07526 18.4583 6.28641 18.6358C6.80818 19.0744 7.34414 19.3496 7.85956 19.4002L8.03056 19.4087H9.41174V16.7807L8.78495 16.7809C7.74476 16.7809 7.00673 16.4227 6.5663 15.8019L6.47647 15.6649C6.23717 15.2693 6.14194 14.8715 6.12188 14.4795L6.11768 14.3119H7.05885C7.05885 14.6016 7.11528 14.9025 7.28177 15.1777C7.51253 15.5592 7.9174 15.7976 8.5937 15.8346L8.78495 15.8397H10.6145L12.0877 17.1837C12.6209 17.5716 13.4146 17.5821 14.0576 17.2702C14.5588 17.0271 14.6664 16.8014 14.5092 16.6584L11.2886 13.7286L11.2941 12.5251V12.3136H14.7371L13.5291 10.6377C12.7952 9.67451 12.5004 9.48067 11.6637 9.48067H3.76471V17.6423ZM2.17957 7.45907H1.58514C1.18109 7.45907 0.847652 7.76143 0.798745 8.15223L0.79257 8.25164V18.2578C0.79257 18.6619 1.09492 18.9953 1.48572 19.0442L1.58514 19.0504H2.17957C2.58362 19.0504 2.91705 18.7481 2.96596 18.3573L2.97214 18.2578V8.25164C2.97214 7.84759 2.66978 7.51416 2.27898 7.46525L2.17957 7.45907ZM10.3529 25.5528V16.8741L11.4942 17.9124L11.6621 18.0256C12.5171 18.5551 13.5921 18.5421 14.4684 18.117C15.4765 17.628 15.9294 16.6781 15.1425 15.9622L12.1664 13.2547H30.1961C30.6725 13.2547 31.0588 13.648 31.0588 14.1332V25.5528C31.0588 26.0379 30.6725 26.4312 30.1961 26.4312H11.2157C10.7392 26.4312 10.3529 26.0379 10.3529 25.5528Z" fill="#052E5C"></path><circle cx="20.7059" cy="19.843" r="4.70588" fill="#0B74E5"></circle><path d="M21.5934 19.6898L20.0494 19.3178C19.8206 19.2623 19.6604 19.0838 19.6604 18.8833C19.6604 18.634 19.9006 18.4315 20.1955 18.4315H21.1605C21.3759 18.4315 21.5809 18.488 21.7521 18.593C21.8303 18.6408 21.9409 18.6252 22.0094 18.5674L22.3079 18.3155C22.3994 18.2382 22.3848 18.1121 22.2821 18.0457C21.9615 17.8381 21.5715 17.7256 21.1605 17.7256H21.1244V17.1959C21.1244 17.0984 21.0308 17.0194 20.9153 17.0194H20.497C20.3814 17.0194 20.2878 17.0984 20.2878 17.1959V17.7254H20.1955C19.3958 17.7254 18.7542 18.3055 18.8298 18.9933C18.8836 19.4822 19.3281 19.8784 19.8873 20.0129L21.3629 20.3683C21.5916 20.4239 21.7519 20.6024 21.7519 20.8029C21.7519 21.0522 21.5116 21.2547 21.2167 21.2547H20.2517C20.0363 21.2547 19.8314 21.1982 19.6601 21.0932C19.5819 21.0453 19.4714 21.061 19.4029 21.1188L19.1043 21.3707C19.0128 21.4479 19.0274 21.5739 19.1302 21.6405C19.4507 21.8481 19.8408 21.9606 20.2517 21.9606H20.2878V22.49C20.2878 22.5875 20.3814 22.6665 20.497 22.6665H20.9153C21.0308 22.6665 21.1244 22.5875 21.1244 22.49V21.9606H21.16C21.7563 21.9606 22.3189 21.6608 22.5121 21.1848C22.7775 20.5309 22.3218 19.8658 21.5934 19.6898Z" fill="white"></path></svg>
+                    <svg width="48" height="48" viewBox="0 0 32 33" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M30 10.3615C30 8.8731 28.7934 7.6665 27.305 7.6665H4.695C3.20659 7.6665 2 8.8731 2 10.3615V22.9715C2 24.4599 3.20659 25.6665 4.695 25.6665H27.305C28.7934 25.6665 30 24.4599 30 22.9715V10.3615ZM4.695 8.6665H27.305L27.4513 8.67273C28.3189 8.74688 29 9.47465 29 10.3615V22.9715L28.9938 23.1178C28.9196 23.9854 28.1919 24.6665 27.305 24.6665H4.695L4.54875 24.6603C3.6811 24.5861 3 23.8584 3 22.9715V10.3615L3.00622 10.2153C3.08037 9.3476 3.80815 8.6665 4.695 8.6665Z" fill="#052E5C"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M8.67528 20.2746L8.14557 21.881H7L9.205 15.6665H10.4582L12.6632 21.881H11.4918L10.9621 20.2746H8.67528ZM8.93368 19.4176H10.6994L9.83377 16.7647H9.80362L8.93368 19.4176ZM15.9535 21.881V16.6054H17.8097V15.6665H12.9862V16.6054H14.8467V21.881H15.9535ZM19.5711 17.471V21.881H18.5676V15.6665H19.8553L21.7589 20.4081H21.7933L23.6968 15.6665H24.9802V21.881H23.9811V17.471H23.9509L22.1551 21.881H21.3971L19.6012 17.471H19.5711Z" fill="#052E5C"></path><rect x="22" y="10.6665" width="5" height="3" rx="1" fill="#0B74E5"></rect></svg>
+                </div>
+            </div>
+            <div id="certification">
+                <p style="margin: 0px; font-weight: 600;">Chứng nhận bởi:</p>
+                <div style="display: flex; justify-content: space-around; align-items: center;">
+                    <a href="/help-center">
+                        <img style="height: 48px;" alt="Protected by DMCA" src="https://statics.pancake.vn/web-media/f0/96/c6/3a/545538cfdebda14fe95764a84d9c77873fc45afc92861e34c15e906c.png">
+                    </a>
+                    <a href="/help-center">
+                        <img style="height: 64px;" alt="notified the Ministry of Industry and Trade" src="https://statics.pancake.vn/web-media/cf/27/4d/00/b64648924e58c3f4e9412777ecac59d8b33dda6dacf397237eddd7a2.png">
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 5 0 5;">
+            <div>Công ty TNHH Thương mại và Dịch vụ <%- locals.shop_name -%></div>
+            <div>Giấy phép đăng ký kinh doanh: 01U8016872 do Sở Kế hoạch và Đầu tư Thành phố Hà Nội cấp.</div>
+            <div style="font-weight: 700">© 2022 <%- locals.shop_name -%> VIỆT NAM</div>
+        </div>
+        <br />
+        <br />
+
+        <style>
+            footer {
+                width: 100%;
+                font-size: 20px;
+                line-height: 1.5;
+                padding-left: 0.5rem;
+                padding-right: 0.5rem;
+                margin-top: 0.75rem;
+                margin-top: 0.5rem;
+                flex-direction: column;
+                align-items: center;
+                color: #000000;
+                background-color: #ffffff;
+                font-family: 'Times New Roman', Times, serif;
+                display: flex;
+            }
+
+            footer>* {
+                max-width: 420px;
+            }
+
+            #short-policy {
+                display: flex;
+                width: 100%;
+                justify-content: space-around;
+                margin-bottom: 15px;
+                flex-wrap: wrap;
+            }
+
+            #short-policy > div {
+                min-width: 420px;
+                display: flex;
+                justify-content: space-around;
+                margin-bottom: 15px;
+                flex-wrap: wrap;
+            }
+
+            #short-policy > div > div {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                width: 156px;
+                background: #ebebeb;
+                border-radius: 15%;
+                padding: 15px;
+                border: #024d82;
+                border-width: 2px;
+                border-style: double;
+            }
+
+            #short-policy svg {
+                height: 96px;
+                width: 96px;
+            }
+
+            #business-info div svg {
+                background-color: gray;
+                color: white;
+                padding: 2px;
+                margin: 0px 5px 0px 5px;
+                border-radius: 5px;
+                height: 24px;
+            }
+
+            #business-info div span {
+                margin-left: 5px;
+            }
+
+            #business-info,
+            #business-policy {
+                display: flex;
+                flex-direction: column;
+                margin-bottom: 10px;
+                text-decoration: auto;
+            }
+
+            #business-info div,
+            #business-policy>a {
+                display: flex;
+                margin: 1px 0px 1px 0px;
+            }
+
+            #business-info>*,
+            #business-policy>* {
+                text-decoration: none;
+                color: black;
+                padding: 8px 0px 8px 0px;
+            }
+
+            #business-info>*:hover,
+            #business-policy>*:hover {
+                color: blue;
+            }
+
+            @media (min-width: 768px) {
+                footer>* {
+                    max-width: 960px;
+                }
+            }
+        </style>
+    </footer>

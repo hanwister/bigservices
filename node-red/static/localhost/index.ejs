@@ -1,0 +1,13 @@
+<% locals = Object.assign(locals, { shop_name: 'Điện Máy Cô Lan', shop_address: 'Số 1 Xuân Bách, xã Quang Tiến, huyện Sóc Sơn, Hà Nội', shop_phone: '0349 839 239', shop_email: 'dienmaycolan@gmail.com', shop_bank: 'Ngân hàng: Ngân hàng Việt Nam Thịnh Vượng VPBank<br>Chủ tài khoản: LE DUC HIEP<br>Số tài khoản: 22726366<br>Nội dung: COLAN + (SĐT đặt hàng)' });
+if ( __req.hostname.endsWith("cokhi24h.shop")) {
+    locals = Object.assign(locals, { shop_name: 'Cơ Khí 24H', shop_address: 'Số 1 Xuân Bách, xã Quang Tiến, huyện Sóc Sơn, Hà Nội', shop_phone: '0349839239', shop_email: `cskh@cokhi24h.shop`, shop_bank: 'Ngân hàng: Ngân hàng Việt Nam Thịnh Vượng VPBank<br>Chủ tài khoản: LE DUC HIEP<br>Số tài khoản: 22726366<br>Nội dung: COKHI24H + (SĐT đặt hàng)' });
+} else if ( __req.hostname.endsWith("shopcolan.com")) {
+    locals = Object.assign(locals, { shop_name: 'Shop Cô Lan', shop_address: 'Xuân Bách, Quang Tiến, Sóc Sơn, Hà Nội', shop_phone: '0349 839 239', shop_email: `cskh@shopcolan.com`, shop_bank: 'Ngân hàng: Ngân hàng Việt Nam Thịnh Vượng VPBank<br>Chủ tài khoản: LE DUC HIEP<br>Số tài khoản: 22726366<br>Nội dung: SHOPCOLAN + (SĐT đặt hàng)' });
+} else if ( __req.hostname.endsWith("nhacolan.com")) {
+    locals = Object.assign(locals, { shop_name: 'Nhà Cô Lan', shop_address: 'Số 1 Xuân Bách, Quang Tiến, Sóc Sơn, Hà Nội', shop_phone: '0377671538', shop_email: `cskh@nhacolan.com`, shop_bank: 'Ngân hàng: Ngân hàng Việt Nam Thịnh Vượng VPBank<br>Chủ tài khoản: LE DUC HIEP<br>Số tài khoản: 22726366<br>Nội dung: NHACOLAN + (SĐT đặt hàng)' });
+} else if ( __req.hostname.endsWith("cokhicolan.com")) {
+    locals = Object.assign(locals, { shop_name: 'Shop Cô Lan', shop_address: 'Số 1 Xuân Bách, xã Quang Tiến, huyện Sóc Sơn, Hà Nội', shop_phone: '0839316847', shop_email: `cskh@cokhicolan.com`, shop_bank: 'Ngân hàng: Ngân hàng Việt Nam Thịnh Vượng VPBank<br>Chủ tài khoản: LE DUC HIEP<br>Số tài khoản: 22726366<br>Nội dung: DH + (SĐT đặt hàng)' });
+}%>
+<%- await include(`section/header`, locals); -%>
+<% let body = `landing${__req.path}`; %> <%- await include(body, locals); -%>
+<%- await include(`section/footer`, locals); -%>

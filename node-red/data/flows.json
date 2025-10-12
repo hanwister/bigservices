@@ -35,7 +35,7 @@
         "id": "772c07f1f620c995",
         "type": "tab",
         "label": "Bull Queue Dashboard",
-        "disabled": false,
+        "disabled": true,
         "info": "",
         "env": []
     },
@@ -43,6 +43,22 @@
         "id": "c23a997595de5280",
         "type": "tab",
         "label": "Process query apollo",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "18caed853880999b",
+        "type": "tab",
+        "label": "Binance",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "af13c7f5e79b8c40",
+        "type": "tab",
+        "label": "Binance Futures P&L",
         "disabled": false,
         "info": "",
         "env": []
@@ -282,6 +298,16 @@
                 "name": "SERVER_SSH",
                 "value": "{\"host\":\"remote1.tolife.me\",\"port\":22,\"username\":\"root\",\"password\":\"anh08091998t\"}",
                 "type": "json"
+            },
+            {
+                "name": "BINANCE_APY_KEY",
+                "value": "3XB35QbcNmAfiLHlovMYp3HBcrzlNoXfORUziwFYqgFCQNMkuZke513l12g9kfq5",
+                "type": "str"
+            },
+            {
+                "name": "BINANCE_API_SECRET",
+                "value": "vIA3sbOKI9sXdRVnuIny3y56fuklKTC8XYOtgddrQaz355YrattaFktRa9aDPjZN",
+                "type": "str"
             }
         ],
         "modules": {}
@@ -1219,7 +1245,8 @@
             [
                 "5e6f6312ae208896",
                 "67147e1ee896d93f",
-                "fb17081cd30510f6"
+                "fb17081cd30510f6",
+                "bde4a9bdb9061a3b"
             ]
         ]
     },
@@ -1461,6 +1488,49 @@
             [
                 "88271cb98fbef6b7"
             ]
+        ]
+    },
+    {
+        "id": "bde4a9bdb9061a3b",
+        "type": "function",
+        "z": "a52209a7262ea19f",
+        "name": "Start Upload",
+        "func": "const {\n  S3Client,\n  PutObjectCommand,\n} = awsSdkClientS3;\n\nconst { Upload } = awsSdkLibStorage;\n\n// File sẽ được lưu tạm thời dưới dạng Buffer trong RAM (req.file.buffer)\nconst storage = multer.memoryStorage();\nconst upload = multer({\n  storage: storage,\n  // Cảnh báo: Thiết lập giới hạn file lớn để kiểm tra Multipart Upload\n  limits: { fileSize: 50 * 1024 * 1024 } // Ví dụ: giới hạn 50MB\n});\n\nconst ACCOUNT_ID = \"cabeebbd339be94fb532e563a50ffd18\";\nconst ACCESS_KEY_ID = \"6fb7e17a9d03336755e649f2af7feaa6\";\nconst SECRET_ACCESS_KEY = \"797ef419d1d6ecb177cd968c4ce74dcecfaf5af67bd98cc8aac61fd442d84e2c\";\nconst BUCKET_NAME = 'dudu-bucket';\n\nconst S3 = new S3Client({\n  region: \"auto\",\n  endpoint: `https://${ACCOUNT_ID}.r2.cloudflarestorage.com`,\n  credentials: {\n    accessKeyId: ACCESS_KEY_ID,\n    secretAccessKey: SECRET_ACCESS_KEY,\n  },\n});\n\nconst Formidable = formidable;\n\nvar emitter = new events.EventEmitter();\nemitter.setMaxListeners(0);\n\nlet returnQueue = 'http-response-' + paralleldriveCuid2.createId();\n\nconst app = flow.get(\"webApp\");\n\nvar addJob = await global.get(\"getQueue\")(\"query\"); \nawait node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Starting at: \" + new Date()\n    });\n\nfunction shouldUseBase64(mimeType) {\n  const binaryMimeRegex = /^(audio|video|image|application\\/(pdf|zip|rar|tar|gzip|bzip2|octet-stream|msword|vnd\\.openxmlformats-officedocument))/i;\n  return binaryMimeRegex.test(mimeType);\n}\n\nconst processUpload = async function (req, res) {\n    let requestId = paralleldriveCuid2.createId();\n    \n    try {\n      if (!req.file) {\n        return res.status(400).send('No file uploaded.');\n      }\n\n      const file = req.file;\n      // Sử dụng tên file gốc (file.originalname) với UUID để đảm bảo tính duy nhất\n      const fileKey = `${requestId}-${file.originalname}`;\n\n      // Khởi tạo Upload với S3Client và các tham số\n      const parallelUploads = new Upload({\n        client: S3,\n        params: {\n          Bucket: BUCKET_NAME,\n          Key: fileKey,\n          Body: file.buffer,\n          // ContentType lấy tự động từ Multer (VD: application/pdf, video/mp4)\n          ContentType: file.mimetype,\n          ACL: 'public-read'\n        },\n        // Cấu hình cho Multipart Upload \n        queueSize: 4,\n        partSize: 5 * 1024 * 1024,\n      });\n\n      // Chờ quá trình upload hoàn tất\n      const data = await parallelUploads.done();\n\n      res.status(200).json({\n        message: `Tệp (${file.mimetype}) đã được upload thành công!`,\n        url: data.Location,\n        size: file.size,\n      });\n    } catch (error) {\n      console.error('Lỗi khi upload tệp:', error);\n      res.status(500).send('Lỗi khi upload tệp lên S3: ' + error.message);\n    }\n\n    await node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Processing at: \" + new Date() + \" \" + requestId\n    });\n    emitter.once(requestId, ({ type, payload }) => {\n        res.type('application/json');\n        switch (type) {\n            case 'data':\n                res.status(200)\n                res.send(payload)\n                break;\n            case 'error':\n                res.status(400)\n                res.send(payload)\n                break;\n        }\n        res.end();\n    });\n    addJob(requestId, {\n        id: requestId,\n        schema: req?.params?.schema,\n        payload: req.body,\n        context: { \n            headers: req.headers,\n            id: requestId,\n            replyTo: returnQueue\n         }\n    }, { jobId: requestId })\n};\n\napp.post(\"/api/upload\", upload.single('file'), processUpload);\n\nglobal.get(\"setWorker\")(returnQueue, async ( returnJob ) => {\n    emitter.emit( returnJob.name, returnJob.data );\n    return null\n}, { concurrency: 100 })\n\nawait node.status({\n    fill: \"green\",\n    shape: \"ring\",\n    text: \"Running at: \" + new Date()\n});\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "paralleldriveCuid2",
+                "module": "@paralleldrive/cuid2"
+            },
+            {
+                "var": "events",
+                "module": "events"
+            },
+            {
+                "var": "formidable",
+                "module": "formidable"
+            },
+            {
+                "var": "awsSdkClientS3",
+                "module": "@aws-sdk/client-s3"
+            },
+            {
+                "var": "multer",
+                "module": "multer"
+            },
+            {
+                "var": "awsSdkLibStorage",
+                "module": "@aws-sdk/lib-storage"
+            }
+        ],
+        "x": 390,
+        "y": 600,
+        "wires": [
+            []
         ]
     },
     {
@@ -2218,5 +2288,226 @@
                 "5fad62146d4956ef"
             ]
         ]
+    },
+    {
+        "id": "0cd032db82ea035a",
+        "type": "inject",
+        "z": "18caed853880999b",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 120,
+        "y": 560,
+        "wires": [
+            [
+                "ef317916f434023c",
+                "88639a9af1475e4a"
+            ]
+        ]
+    },
+    {
+        "id": "ef317916f434023c",
+        "type": "function",
+        "z": "18caed853880999b",
+        "d": true,
+        "name": "Set MainClient",
+        "func": "var { MainClient } = binance;\n\n// or, if you prefer `require()`:\n// const { MainClient } = require('binance');\n\nconst API_KEY = 'xxx';\nconst API_SECRET = 'yyy';\n\nconst client = new MainClient({\n    api_key: \"3XB35QbcNmAfiLHlovMYp3HBcrzlNoXfORUziwFYqgFCQNMkuZke513l12g9kfq5\",\n    api_secret: \"vIA3sbOKI9sXdRVnuIny3y56fuklKTC8XYOtgddrQaz355YrattaFktRa9aDPjZN\",\n    // Connect to testnet environment\n    // testnet: true,\n});\n\nflow.set(\"binance\", client)\n\n// client\n//     .getAccountTradeList({ symbol: 'BTCUSDT' })\n//     .then((result) => {\n//         console.log('getAccountTradeList result: ', result);\n//     })\n//     .catch((err) => {\n//         console.error('getAccountTradeList error: ', err);\n//     });\n\n// client\n//     .getExchangeInfo()\n//     .then((result) => {\n//         console.log('getExchangeInfo inverse result: ', result);\n//     })\n//     .catch((err) => {\n//         console.error('getExchangeInfo inverse error: ', err);\n//     });\nnode.send({})",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "binance",
+                "module": "binance"
+            }
+        ],
+        "x": 480,
+        "y": 220,
+        "wires": [
+            [
+                "313e5a6a58728ee2"
+            ]
+        ]
+    },
+    {
+        "id": "313e5a6a58728ee2",
+        "type": "function",
+        "z": "18caed853880999b",
+        "name": "Get price and qty",
+        "func": "await new Promise(( resolve, reject) => {\n    flow.get(\"binance\")\n        .getAccountTradeList({ symbol: 'MEMEUSDT' })\n        .then((result) => {\n            node.status({fill:\"red\",shape:\"ring\",text: `${'getAccountTradeList result'}: ${result[0]?.price} - ${result[0]?.qty}`});\n            console.log('getAccountTradeList result: ', result);\n            resolve(null)\n        })\n        .catch((err) => {\n            console.error('getAccountTradeList error: ', err);\n        });\n})\n\n// client\n//     .getExchangeInfo()\n//     .then((result) => {\n//         console.log('getExchangeInfo inverse result: ', result);\n//     })\n//     .catch((err) => {\n//         console.error('getExchangeInfo inverse error: ', err);\n//     });\n\nreturn null",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "binance",
+                "module": "binance"
+            }
+        ],
+        "x": 490,
+        "y": 320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "88639a9af1475e4a",
+        "type": "function",
+        "z": "18caed853880999b",
+        "name": "Set USDMClient",
+        "func": "var { USDMClient } = binance;\n\n// or, if you prefer `require()`:\n// const { MainClient } = require('binance');\n\nconst API_KEY = 'xxx';\nconst API_SECRET = 'yyy';\n\nconst client = new USDMClient({\n    api_key: \"3XB35QbcNmAfiLHlovMYp3HBcrzlNoXfORUziwFYqgFCQNMkuZke513l12g9kfq5\",\n    api_secret: \"vIA3sbOKI9sXdRVnuIny3y56fuklKTC8XYOtgddrQaz355YrattaFktRa9aDPjZN\",\n    // Connect to testnet environment\n    // testnet: true,\n});\n\nflow.set(\"USDMClient\", client)\n\nclient\n  .getBalance()\n  .then((result) => {\n    console.log('getBalance result: ', result);\n  })\n  .catch((err) => {\n    console.error('getBalance error: ', err);\n  });\n\n// client\n//     .getExchangeInfo()\n//     .then((result) => {\n//         console.log('getExchangeInfo inverse result: ', result);\n//     })\n//     .catch((err) => {\n//         console.error('getExchangeInfo inverse error: ', err);\n//     });\nnode.send({})",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "binance",
+                "module": "binance"
+            }
+        ],
+        "x": 400,
+        "y": 600,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "939493ad0139f82c",
+        "type": "function",
+        "z": "18caed853880999b",
+        "name": "Submit New Order",
+        "func": "await new Promise(( resolve, reject) => {\n    flow.get(\"USDMClient\")\n        .submitNewOrder({\n            side: 'SELL',\n            symbol: 'BTCUSDT',\n            type: 'MARKET',\n            quantity: 0.001,\n        })\n        .then((result) => {\n            console.log('submitNewOrder result: ', result);\n        })\n        .catch((err) => {\n            console.error('submitNewOrder error: ', err);\n        });\n})\n\n// client\n//     .getExchangeInfo()\n//     .then((result) => {\n//         console.log('getExchangeInfo inverse result: ', result);\n//     })\n//     .catch((err) => {\n//         console.error('getExchangeInfo inverse error: ', err);\n//     });\n\nreturn null",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "binance",
+                "module": "binance"
+            }
+        ],
+        "x": 690,
+        "y": 600,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "44cf2450dae251bd",
+        "type": "inject",
+        "z": "af13c7f5e79b8c40",
+        "name": "Trigger P&L Check",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 140,
+        "y": 140,
+        "wires": [
+            [
+                "8bd0dab039326632"
+            ]
+        ]
+    },
+    {
+        "id": "8bd0dab039326632",
+        "type": "function",
+        "z": "af13c7f5e79b8c40",
+        "name": "1. Set USDMClient",
+        "func": "var Binance = binanceApiNode.default;\n\n// ⚠️ THAY THẾ API KEY/SECRET CỦA BẠN TẠI ĐÂY\nconst API_KEY = env.get('BINANCE_APY_KEY');\nconst API_SECRET = env.get('BINANCE_API_SECRET');\n\nconst client = new Binance({\n    apiKey: API_KEY,\n    apiSecret: API_SECRET,\n    // testnet: true, // Bỏ comment nếu dùng testnet\n});\n\nflow.set(\"USDMClient\", client)\n\nmsg.client = client;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "binanceApiNode",
+                "module": "binance-api-node"
+            }
+        ],
+        "x": 390,
+        "y": 140,
+        "wires": [
+            [
+                "caf096599c917c0b"
+            ]
+        ]
+    },
+    {
+        "id": "caf096599c917c0b",
+        "type": "function",
+        "z": "af13c7f5e79b8c40",
+        "name": "2. Get Open Positions & P&L",
+        "func": "const client = msg.client;\n\n// Sử dụng getPositionRisk để lấy các vị thế đang mở\n// await client.getPositionRisk()\n//     .then((positions) => {\n//         // Lọc các vị thế có 'positionAmt' khác 0 (vị thế đang mở)\n//         const openPositions = positions.filter(p => parseFloat(p.positionAmt) !== 0);\n        \n//         if (openPositions.length === 0) {\n//             node.warn(\"Không có vị thế đang mở nào.\");\n//             msg.payload = \"Không có vị thế đang mở nào.\";\n//             return msg;\n//         }\n\n//         const results = openPositions.map(p => ({\n//             symbol: p.symbol,\n//             amount: p.positionAmt, // Số lượng (Long/Short)\n//             entryPrice: p.entryPrice, // Giá vào lệnh\n//             markPrice: p.markPrice, // Giá đánh dấu hiện tại\n//             unrealizedProfit: p.unRealizedProfit, // Lãi/Lỗ chưa thực hiện\n//             leverage: p.leverage, // Đòn bẩy\n//             // Các trường khác có thể bao gồm: isolatedWallet, marginType\n//         }));\n\n//         // Log kết quả ra console và payload\n//         console.log('Open Positions with P&L:', results);\n//         msg.payload = results;\n//         node.status({fill:\"green\",shape:\"dot\",text: `Found ${results.length} positions.`});\n//         return msg;\n//     })\n//     .catch((err) => {\n//         node.error('Error getting position risk: ' + err.message, msg);\n//         node.status({fill:\"red\",shape:\"dot\",text: \"API Error\"});\n//         return null; // Không chuyển message đi tiếp khi có lỗi\n//     });\n\nconst c = \"LINKUSDT\"\n\nawait client.futuresMarkPrice({ symbol: c}).then( result => {\n    node.status({fill:\"red\",shape:\"ring\",text:c + \": \" + result['markPrice']});\n})\nconsole.log(await client.futuresAllOrders())\nconsole.log(\n    await client.futuresGetOrder({\n        symbol: 'LINKUSDT',\n        orderId: 44438930210,\n    })\n)\n// Trả về null vì logic chính được xử lý trong Promise/await\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "binance",
+                "module": "binance"
+            }
+        ],
+        "x": 680,
+        "y": 140,
+        "wires": [
+            [
+                "a8c0b0c9aa71938a"
+            ]
+        ]
+    },
+    {
+        "id": "a8c0b0c9aa71938a",
+        "type": "debug",
+        "z": "af13c7f5e79b8c40",
+        "name": "Debug Output P&L",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 930,
+        "y": 140,
+        "wires": []
     }
 ]
