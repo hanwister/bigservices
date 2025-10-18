@@ -16,6 +16,14 @@
         "env": []
     },
     {
+        "id": "f36228d8945cf488",
+        "type": "tab",
+        "label": "Flow 2",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
         "id": "1e273549eda8541e",
         "type": "subflow",
         "name": "Queue Containers",
@@ -102,6 +110,53 @@
         }
     },
     {
+        "id": "f6d459a4ae44e291",
+        "type": "subflow",
+        "name": "Subflow 1",
+        "info": "",
+        "in": [],
+        "out": []
+    },
+    {
+        "id": "8018d9f1020dc2a3",
+        "type": "subflow",
+        "name": "Subflow 2",
+        "info": "",
+        "in": [
+            {
+                "x": 140,
+                "y": 220,
+                "wires": [
+                    {
+                        "id": "d62b676003f58fa1"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 540,
+                "y": 280,
+                "wires": [
+                    {
+                        "id": "d62b676003f58fa1",
+                        "port": 1
+                    }
+                ]
+            }
+        ],
+        "status": {
+            "x": 520,
+            "y": 160,
+            "wires": [
+                {
+                    "id": "d62b676003f58fa1",
+                    "port": 0
+                }
+            ]
+        }
+    },
+    {
         "id": "f56ecd1451d0649d",
         "type": "global-config",
         "env": [
@@ -123,11 +178,11 @@
         "type": "function",
         "z": "1e273549eda8541e",
         "name": "Start Queue Container",
-        "func": "// Code added here will be run once\n// whenever the node is started.\nconst { Queue, QueueEvents } = bullmq;\nconst IORedis = ioredis;\n\nconst connection = new IORedis(env.get(\"REDIS_URL\") || env.get(\"REDIS_CONNECTION\"), { maxRetriesPerRequest: null, connectionName: 'rayman',\n  connectTimeout: 1000,\n  retryStrategy: () => {\n    return false;\n  } });\nconsole.log(env.get(\"REDIS_URL\") || env.get(\"REDIS_CONNECTION\"))\n\nvar queues = {};\nvar eventQueues = {};\n\n( async () => {\n    await node.send([{\n        topic: \"status\",\n        payload: {\n            fill: \"red\",\n            shape: \"ring\",\n            text: \"Starting Queue Containers\"\n        }\n    }]);\n    await global.set(\"sendJobToQueue\", async (queueName, jobName, jobData, jobOptions = {}) => {\n        if (!queues[queueName]) {\n            queues[queueName] = await new Queue(queueName, { connection });\n            eventQueues[queueName] = await new QueueEvents(queueName, { connection });\n        };\n        var job = await queues[queueName].add(jobName, jobData, Object.assign({ removeOnComplete: 1000, removeOnFail: 5000 }, jobOptions));\n        const result = await job.waitUntilFinished(eventQueues[queueName]);\n        return result\n    });\n    await global.set(\"getQueue\", async (queueName) => {\n        if (!queues[queueName]) {\n            queues[queueName] = await new Queue(queueName, { connection });\n            eventQueues[queueName] = await new QueueEvents(queueName, { connection });\n            node.send([{\n                topic: \"status\",\n                payload: {\n                    fill: \"red\",\n                    shape: \"ring\",\n                    text: \"Starting Queue: \" + queueName\n                }\n            }]);\n        };\n        let queueJob = async (jobName, jobData, jobOptions = {}) => {\n            var job = await queues[queueName].add(jobName, jobData, jobOptions);\n            const result = await job.waitUntilFinished(eventQueues[queueName]);\n            return result\n        };\n        return queueJob\n    });\n    await node.send([{\n        topic: \"status\",\n        payload: {\n            fill: \"red\",\n            shape: \"ring\",\n            text: \"Running Queue Containers \"\n        }\n    }]);\n    node.send([null,{}])\n})()",
+        "func": "",
         "outputs": 2,
         "timeout": 0,
         "noerr": 0,
-        "initialize": "",
+        "initialize": "// Code added here will be run once\n// whenever the node is started.\nconst { Queue, Worker, QueueEvents } = bullmq;\nconst IORedis = ioredis;\nconst { EventEmitter } = events;\n\nvar emitter = new EventEmitter();\nemitter.setMaxListeners(0);\n\nconst createKey = () => paralleldriveCuid2.createId()\n\nconst connection = new IORedis(env.get(\"REDIS_URL\") || env.get(\"REDIS_CONNECTION\"), {\n    maxRetriesPerRequest: null, connectionName: 'rayman',\n    connectTimeout: 1000,\n    retryStrategy: () => {\n        return false;\n    }\n});\nconsole.log(env.get(\"REDIS_URL\") || env.get(\"REDIS_CONNECTION\"))\n\nvar queues = {};\nvar workers = {};\nvar eventQueues = {};\nvar sockets = {};\n\nawait node.send([{\n    topic: \"status\",\n    payload: {\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Starting Queue Containers\"\n    }\n}]);\n\nconst createQueue = async (queueName) => {\n    if (!queues[queueName]) {\n        console.log(`Create Queue: ${ queueName}`)\n        queues[queueName] = await new Queue(queueName, { connection });\n        eventQueues[queueName] = await new QueueEvents(queueName, { connection });\n        node.send([{\n            topic: \"status\",\n            payload: {\n                fill: \"red\",\n                shape: \"ring\",\n                text: \"Starting Queue: \" + queueName\n            }\n        }]);\n    };\n    let queueJob = async (jobName, jobData, jobOptions = {}) => {\n        var job = await queues[queueName].add(jobName, jobData, jobOptions);\n        const result = await job.waitUntilFinished(eventQueues[queueName]);\n        return result\n    };\n    return queueJob\n}\n\nconst createWorker = async (queueName, workerRun, options) => {\n    if (!workers[queueName]) {\n        console.log(`Create Worker: ${queueName}`)\n        workers[queueName] = await new Worker(queueName, workerRun ||  (async (job) => {\n            console.log(`worker:${queueName} => job:${job.id}`)\n            emitter.emit(job.id, job.data)\n        }), { options, connection })\n    };\n    return workers[queueName];\n}\n\nconst createJob = async (queueName, jobName, jobData, jobOptions = {}, callback = (p) => { }) => {\n    return await new Promise(async (resolve, reject) => {\n        await createQueue(queueName);\n        let replyTo = jobData?.context?.replyTo;\n        jobOptions.jobId = jobOptions.jobId || createKey()\n        var addJob = await queues[queueName].add(jobName, jobData, Object.assign({ removeOnComplete: 1000, removeOnFail: 5000 }, jobOptions ));\n        if (replyTo) {\n            await createWorker(replyTo)\n            console.log(`Send job: ${queueName} ${jobOptions.jobId} ==> ${replyTo}` );\n            emitter.on(jobOptions.jobId, (data) => {\n                callback(data)\n                if (['error', 'complete'].includes(data.type)) { emitter.removeAllListeners(jobOptions.jobId) }\n            })\n        } else {\n            const result = await addJob.waitUntilFinished(eventQueues[queueName]);\n            resolve(result)\n        }\n\n    })\n}\n\nconst createSoc = async function (schema, socFunc, callback = () => { }) {\n    try {\n        if (!sockets[schema]) {\n            let replyTo = 'http-response-' + paralleldriveCuid2.createId();\n            sockets[schema] = {\n                query: async (query, variables = {}, callFunc) => {\n                    let requestId = paralleldriveCuid2.createId();\n                    try {\n                        node.status({\n                            fill: \"red\",\n                            shape: \"ring\",\n                            text: \"Processing at: \" + new Date() + \" \" + requestId\n                        });\n                        await new Promise((resolve, reject) => {\n                            createJob(\"query\", requestId, {\n                                id: requestId,\n                                schema,\n                                payload: { query, variables },\n                                context: {\n                                    headers: {},\n                                    id: requestId,\n                                    replyTo\n                                }\n                            }, { jobId: requestId }, ({ type, payload}) => {\n                                console.log(payload)\n                                callFunc(payload)\n                            });\n                        })\n                    } catch (err) {\n                        console.log(\"sr\", schema, requestId, err.message)\n                        callFunc({\n                            type: 'error',\n                            payload: {\n                                errors: [{\n                                    message: err.message\n                                }]\n                            }\n                        })\n                        node.status({\n                            text: err.message\n                        })\n                    }\n                    return\n                }\n            }\n        }\n        // return await new Promise( async (resolve, reject) => {\n        await socFunc.bind({}, sockets[schema])();\n    } catch (err) {\n        console.log(err.message)\n    }\n};\n\nawait node.send([{\n    topic: \"status\",\n    payload: {\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Running Queue Containers \"\n    }\n}]);\nnode.send([null, {}]);\n\nglobal.set(\"createQueue\", createQueue);\nglobal.set(\"createWorker\", createWorker);\nglobal.set(\"createJob\", createJob);\nglobal.set(\"createSoc\", createSoc);",
         "finalize": "",
         "libs": [
             {
@@ -137,6 +192,14 @@
             {
                 "var": "ioredis",
                 "module": "ioredis"
+            },
+            {
+                "var": "events",
+                "module": "events"
+            },
+            {
+                "var": "paralleldriveCuid2",
+                "module": "@paralleldrive/cuid2"
             }
         ],
         "x": 420,
@@ -169,6 +232,57 @@
         ],
         "x": 280,
         "y": 200,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "a5fe147a25e1776d",
+        "type": "function",
+        "z": "f6d459a4ae44e291",
+        "name": "function 1",
+        "func": "\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "\nvar emitter = new events.EventEmitter();\nemitter.setMaxListeners(0);\n\nlet returnQueue = 'http-response-' + paralleldriveCuid2.createId();\n\n\n\nconst app = flow.get(\"webApp\");\n\nvar addJob = await global.get(\"getQueue\")(\"query\");\nawait node.status({\n    fill: \"red\",\n    shape: \"ring\",\n    text: \"Starting at: \" + new Date()\n});\n\nconst processRequest = async function (schema, socFunc, callback = () => { }) {\n    // return await new Promise( async (resolve, reject) => {\n    let requestId = paralleldriveCuid2.createId();\n    node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Processing at: \" + new Date() + \" \" + requestId\n    });\n    await socFunc.bind({}, {\n        query: async (query, variables = {}, callFunc) => {\n            addJob(requestId, {\n                id: requestId,\n                schema,\n                payload: { query, variables },\n                context: {\n                    headers: {},\n                    id: requestId,\n                    replyTo: returnQueue\n                }\n            }, { jobId: requestId });\n\n            let { type, payload } = await new Promise((resolve, reject) => {\n                emitter.once(requestId, async ({ type, payload }) => {\n                    resolve({ type, payload })\n                });\n            })\n            try {\n                await callFunc(payload)\n            } catch (err) {\n                console.log(\"sr\", schema, requestId, err.message)\n                payload = {\n                    errors: [{\n                        message: err.message\n                    }]\n                }\n                node.status({\n                    text: err.message\n                })\n            }\n            console.log(\"se\", schema, requestId, payload)\n            return\n        }\n    })();\n    console.log(\"fulle\", schema, requestId)\n    return \"tesst\"\n    // })\n};\n\nflow.set(\"soc\", processRequest)\n\nglobal.set(\"getSoc\", async () => {\n\n})\n\nglobal.get(\"setWorker\")(returnQueue, async (returnJob) => {\n    emitter.emit(returnJob.name, returnJob.data);\n    return null\n}, { concurrency: 100 })\n\nawait node.status({\n    fill: \"green\",\n    shape: \"ring\",\n    text: \"Running at: \" + new Date()\n});\n\nnode.send({})\n",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "events",
+                "module": "events"
+            },
+            {
+                "var": "paralleldriveCuid2",
+                "module": "@paralleldrive/cuid2"
+            }
+        ],
+        "x": 380,
+        "y": 300,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "d62b676003f58fa1",
+        "type": "function",
+        "z": "8018d9f1020dc2a3",
+        "name": "function 2",
+        "func": "node.send([{\n    topic: \"status\",\n    payload: {\n        fill: \"red\",\n        shape: \"ring\",\n        text: flow.get(\"init\") || \"ojo\"\n    }\n}, null]);\n\nflow.set(\"tt\", \"sadđsfdsf\")\nnode.send([null, { payload: {}}]);",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "let init = paralleldriveCuid2.createId()\n\n// setInterval( () => {\n\nnode.send([{\n    topic: \"status\",\n    payload: {\n        fill: \"red\",\n        shape: \"ring\",\n        text: init\n    }\n}, null]);\n// }, 1000)",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "paralleldriveCuid2",
+                "module": "@paralleldrive/cuid2"
+            }
+        ],
+        "x": 360,
+        "y": 220,
         "wires": [
             [],
             []
@@ -247,7 +361,7 @@
         "type": "function",
         "z": "2e0a33d53a902e50",
         "name": "Start LadiPage Server",
-        "func": "node.status({\n    shape: \"ring\",\n    text: \"Starting\"\n})\n\nlet app = await flow.get(\"webApp\");\nlet Helper = await context.get('Helper');\n\nconst processRequest = async function (__req, __res) {\n    let findData = await flow.get(\"findData\");\n    let time = Date.now()\n    node.status({fill:\"red\",shape:\"ring\",text:\"message\\nsadsad\"});\n    console.log(\"start get\", __req.path)\n    try {\n        if (__req.path === \"/\") {\n            Object.defineProperties(__req, {\n                path: { value: \"/index\", writable: true, enumerable: true, configurable: true },\n            });\n        };\n        __res.set({ 'Content-Type': Helper.getMime(url.parse(__req.url, true)) })\n        __req.hostname = \"localhost\";\n        await findData({ __req, __res, level: 1, hostname: \"localhost\", path: __req.path });\n    } catch (err) {\n        console.log(err.message)\n        __res.send(err.message);\n    }\n    // __res.send('dsfsdf');\n    // __res.end()\n    console.log(\"end get\", __req.path, Date.now() - time)\n}\napp.get(\"/\", processRequest);\napp.get(\"/*splat\", processRequest)\n\nnode.status({\n    shape: \"ring\",\n    text: \"Running\"\n})\nreturn msg;",
+        "func": "node.status({\n    shape: \"ring\",\n    text: \"Starting\"\n})\n\nlet app = await flow.get(\"webApp\");\nlet Helper = await context.get('Helper');\n\nconst processRequest = async function (__req, __res) {\n    let findData = await flow.get(\"findData\");\n    let time = Date.now()\n    node.status({fill:\"red\",shape:\"ring\",text:\"message\\nsadsad\"});\n    console.log(\"start get\", __req.path)\n    try {\n        if (__req.path === \"/\") {\n            Object.defineProperties(__req, {\n                path: { value: \"/index\", writable: true, enumerable: true, configurable: true },\n            });\n        };\n        __res.set({ 'Content-Type': Helper.getMime(url.parse(__req.url, true)) })\n        // __req.hostname = \"localhost\";\n        // await findData({ __req, __res, level: 1, hostname: \"localhost\", path: __req.path });\n    } catch (err) {\n        console.log(err.message)\n        __res.send(err.message);\n    }\n    // __res.send('dsfsdf');\n    // __res.end()\n    console.log(\"end get\", __req.path, Date.now() - time)\n}\napp.get(\"/\", processRequest);\napp.get(\"/*splat\", processRequest)\n\nnode.status({\n    shape: \"ring\",\n    text: \"Running\"\n})\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -282,7 +396,7 @@
         "repeat": "",
         "crontab": "",
         "once": true,
-        "onceDelay": 0.1,
+        "onceDelay": "1",
         "topic": "",
         "payload": "",
         "payloadType": "date",
@@ -463,7 +577,7 @@
         "type": "function",
         "z": "2e0a33d53a902e50",
         "name": "Start HTTP",
-        "func": " \nvar emitter = new events.EventEmitter();\nemitter.setMaxListeners(0);\n\nlet returnQueue = 'http-response-' + paralleldriveCuid2.createId();\n\nconst app = flow.get(\"webApp\");\n\nvar addJob = await global.get(\"getQueue\")(\"query\"); \nawait node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Starting at: \" + new Date()\n    });\n\nconst processRequest = async function (req, res) {\n    let requestId = paralleldriveCuid2.createId();\n    await node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Processing at: \" + new Date() + \" \" + requestId\n    });\n    emitter.once(requestId, ({ type, payload }) => {\n        res.type('application/json');\n        switch (type) {\n            case 'data':\n                res.status(200)\n                res.send(payload)\n                break;\n            case 'error':\n                res.status(400)\n                res.send(payload)\n                break;\n        }\n        res.end();\n    });\n    addJob(requestId, {\n        id: requestId,\n        schema: req?.params?.schema,\n        payload: req.body,\n        context: { \n            headers: req.headers,\n            id: requestId,\n            replyTo: returnQueue\n         }\n    }, { jobId: requestId })\n};\n\napp.post(\"/:schema\", processRequest);\napp.post(\"/graphql/:schema\", processRequest);\n\nglobal.get(\"setWorker\")(returnQueue, async ( returnJob ) => {\n    emitter.emit( returnJob.name, returnJob.data );\n    return null\n}, { concurrency: 100 })\n\nawait node.status({\n    fill: \"green\",\n    shape: \"ring\",\n    text: \"Running at: \" + new Date()\n});\n\nnode.send({ payload: {}})",
+        "func": " \nvar emitter = new events.EventEmitter();\nemitter.setMaxListeners(0);\n\nlet replyTo = 'http-response-' + paralleldriveCuid2.createId();\n\nconst app = flow.get(\"webApp\");\nvar createJob = await global.get(\"createJob\"); \n\nawait node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Starting at: \" + new Date()\n    });\n\nconst processRequest = async function (req, res) {\n    let requestId = paralleldriveCuid2.createId();\n    await node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Processing at: \" + new Date() + \" \" + requestId\n    });\n    createJob(\"query\", requestId, {\n        id: requestId,\n        schema: req?.params?.schema,\n        payload: req.body,\n        context: { \n            headers: req.headers,\n            id: requestId,\n            replyTo\n         }\n    }, { jobId: requestId }, ({ type, payload }) => {\n        res.type('application/json');\n        switch (type) {\n            case 'data':\n                res.status(200)\n                res.send(payload)\n                break;\n            case 'error':\n                res.status(400)\n                res.send(payload)\n                break;\n        }\n        res.end();\n    })  \n};\n\napp.post(\"/:schema\", processRequest);\napp.post(\"/graphql/:schema\", processRequest);\n\nawait node.status({\n    fill: \"green\",\n    shape: \"ring\",\n    text: \"Running at: \" + new Date()\n});\n\nnode.send({ payload: {}})",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -551,7 +665,7 @@
         "type": "function",
         "z": "2e0a33d53a902e50",
         "name": "Start Upload",
-        "func": "const {\n  S3Client,\n  PutObjectCommand,\n} = awsSdkClientS3;\n\nconst { Upload } = awsSdkLibStorage;\n\n// File sẽ được lưu tạm thời dưới dạng Buffer trong RAM (req.file.buffer)\nconst storage = multer.memoryStorage();\nconst upload = multer({\n  storage: storage,\n  // Cảnh báo: Thiết lập giới hạn file lớn để kiểm tra Multipart Upload\n  limits: { fileSize: 5000 * 1024 * 1024 } // Ví dụ: giới hạn 50MB\n});\n\nconst ACCOUNT_ID = \"cabeebbd339be94fb532e563a50ffd18\";\nconst ACCESS_KEY_ID = \"6fb7e17a9d03336755e649f2af7feaa6\";\nconst SECRET_ACCESS_KEY = \"797ef419d1d6ecb177cd968c4ce74dcecfaf5af67bd98cc8aac61fd442d84e2c\";\nconst BUCKET_NAME = 'dudu-bucket';\n\nconst S3 = new S3Client({\n  region: \"auto\",\n  endpoint: `https://${ACCOUNT_ID}.r2.cloudflarestorage.com`,\n  credentials: {\n    accessKeyId: ACCESS_KEY_ID,\n    secretAccessKey: SECRET_ACCESS_KEY,\n  },\n});\n\nconst Formidable = formidable;\n\nvar emitter = new events.EventEmitter();\nemitter.setMaxListeners(0);\n\nlet returnQueue = 'http-response-' + paralleldriveCuid2.createId();\n\nconst app = flow.get(\"webApp\");\n\nvar addJob = await global.get(\"getQueue\")(\"query\"); \nawait node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Starting at: \" + new Date()\n    });\n\nfunction shouldUseBase64(mimeType) {\n  const binaryMimeRegex = /^(audio|video|image|application\\/(pdf|zip|rar|tar|gzip|bzip2|octet-stream|msword|vnd\\.openxmlformats-officedocument))/i;\n  return binaryMimeRegex.test(mimeType);\n}\n\nconst processUpload = async function (req, res) {\n    let requestId = paralleldriveCuid2.createId();\n    \n    try {\n      if (!req.file) {\n        return res.status(400).send('No file uploaded.');\n      }\n\n      const file = req.file;\n      // Sử dụng tên file gốc (file.originalname) với UUID để đảm bảo tính duy nhất\n      const fileKey = `${requestId}-${file.originalname}`;\n\n      // Khởi tạo Upload với S3Client và các tham số\n      const parallelUploads = new Upload({\n        client: S3,\n        params: {\n          Bucket: BUCKET_NAME,\n          Key: fileKey,\n          Body: file.buffer,\n          // ContentType lấy tự động từ Multer (VD: application/pdf, video/mp4)\n          ContentType: file.mimetype,\n          ACL: 'public-read'\n        },\n        // Cấu hình cho Multipart Upload \n        queueSize: 4,\n        partSize: 5 * 1024 * 1024,\n      });\n\n      // Chờ quá trình upload hoàn tất\n      const data = await parallelUploads.done();\n\n      res.status(200).json({\n        message: `Tệp (${file.mimetype}) đã được upload thành công!`,\n        url: data.Location,\n        size: file.size,\n      });\n    } catch (error) {\n      console.error('Lỗi khi upload tệp:', error);\n      res.status(500).send('Lỗi khi upload tệp lên S3: ' + error.message);\n    }\n\n    await node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Processing at: \" + new Date() + \" \" + requestId\n    });\n    emitter.once(requestId, ({ type, payload }) => {\n        res.type('application/json');\n        switch (type) {\n            case 'data':\n                res.status(200)\n                res.send(payload)\n                break;\n            case 'error':\n                res.status(400)\n                res.send(payload)\n                break;\n        }\n        res.end();\n    });\n    addJob(requestId, {\n        id: requestId,\n        schema: req?.params?.schema,\n        payload: req.body,\n        context: { \n            headers: req.headers,\n            id: requestId,\n            replyTo: returnQueue\n         }\n    }, { jobId: requestId })\n};\n\napp.post(\"/api/upload\", upload.single('file'), processUpload);\n\nglobal.get(\"setWorker\")(returnQueue, async ( returnJob ) => {\n    emitter.emit( returnJob.name, returnJob.data );\n    return null\n}, { concurrency: 100 })\n\nawait node.status({\n    fill: \"green\",\n    shape: \"ring\",\n    text: \"Running at: \" + new Date()\n});\n\nnode.send({ payload: {}})",
+        "func": "const {\n  S3Client,\n  PutObjectCommand,\n} = awsSdkClientS3;\n\nconst { Upload } = awsSdkLibStorage;\n\n// File sẽ được lưu tạm thời dưới dạng Buffer trong RAM (req.file.buffer)\nconst storage = multer.memoryStorage();\nconst upload = multer({\n  storage: storage,\n  // Cảnh báo: Thiết lập giới hạn file lớn để kiểm tra Multipart Upload\n  limits: { fileSize: 5000 * 1024 * 1024 } // Ví dụ: giới hạn 50MB\n});\n\nconst ACCOUNT_ID = \"cabeebbd339be94fb532e563a50ffd18\";\nconst ACCESS_KEY_ID = \"6fb7e17a9d03336755e649f2af7feaa6\";\nconst SECRET_ACCESS_KEY = \"797ef419d1d6ecb177cd968c4ce74dcecfaf5af67bd98cc8aac61fd442d84e2c\";\nconst BUCKET_NAME = 'dudu-bucket';\n\nconst S3 = new S3Client({\n  region: \"auto\",\n  endpoint: `https://${ACCOUNT_ID}.r2.cloudflarestorage.com`,\n  credentials: {\n    accessKeyId: ACCESS_KEY_ID,\n    secretAccessKey: SECRET_ACCESS_KEY,\n  },\n});\n\nconst Formidable = formidable;\n\nvar emitter = new events.EventEmitter();\nemitter.setMaxListeners(0);\n\nlet returnQueue = 'http-response-' + paralleldriveCuid2.createId();\n\nconst app = flow.get(\"webApp\");\n\nawait node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Starting at: \" + new Date()\n    });\n\nfunction shouldUseBase64(mimeType) {\n  const binaryMimeRegex = /^(audio|video|image|application\\/(pdf|zip|rar|tar|gzip|bzip2|octet-stream|msword|vnd\\.openxmlformats-officedocument))/i;\n  return binaryMimeRegex.test(mimeType);\n}\n\nconst processUpload = async function (req, res) {\n    let requestId = paralleldriveCuid2.createId();\n    \n    try {\n      if (!req.file) {\n        return res.status(400).send('No file uploaded.');\n      }\n\n      const file = req.file;\n      // Sử dụng tên file gốc (file.originalname) với UUID để đảm bảo tính duy nhất\n      const fileKey = `${requestId}-${file.originalname}`;\n\n      // Khởi tạo Upload với S3Client và các tham số\n      const parallelUploads = new Upload({\n        client: S3,\n        params: {\n          Bucket: BUCKET_NAME,\n          Key: fileKey,\n          Body: file.buffer,\n          // ContentType lấy tự động từ Multer (VD: application/pdf, video/mp4)\n          ContentType: file.mimetype,\n          ACL: 'public-read'\n        },\n        // Cấu hình cho Multipart Upload \n        queueSize: 4,\n        partSize: 5 * 1024 * 1024,\n      });\n\n      // Chờ quá trình upload hoàn tất\n      const data = await parallelUploads.done();\n\n      res.status(200).json({\n        message: `Tệp (${file.mimetype}) đã được upload thành công!`,\n        url: data.Location,\n        size: file.size,\n      });\n    } catch (error) {\n      console.error('Lỗi khi upload tệp:', error);\n      res.status(500).send('Lỗi khi upload tệp lên S3: ' + error.message);\n    }\n\n    await node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Processing at: \" + new Date() + \" \" + requestId\n    });\n};\n\napp.post(\"/api/upload\", upload.single('file'), processUpload);\n\nawait node.status({\n    fill: \"green\",\n    shape: \"ring\",\n    text: \"Running at: \" + new Date()\n});\n\nnode.send({ payload: {}})",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -595,12 +709,12 @@
         "id": "cf1144606b63a99f",
         "type": "function",
         "z": "2e0a33d53a902e50",
-        "name": "Server File",
-        "func": "const {\n  S3Client,\n  GetObjectCommand,\n  HeadObjectCommand\n} = awsSdkClientS3;\nconst { Readable } = stream;\n\nconst { getSignedUrl } = awsSdkS3RequestPresigner;\n\nconst ACCOUNT_ID = \"cabeebbd339be94fb532e563a50ffd18\";\nconst ACCESS_KEY_ID = \"6fb7e17a9d03336755e649f2af7feaa6\";\nconst SECRET_ACCESS_KEY = \"797ef419d1d6ecb177cd968c4ce74dcecfaf5af67bd98cc8aac61fd442d84e2c\";\nconst BUCKET_NAME = 'dudu-bucket';\n\n// Định nghĩa giới hạn kích thước (byte)\nconst MAX_CACHE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB (Hit Cache)\nconst MAX_STREAM_SIZE_BYTES = 2 * 1024 * 1024; // 2MB (Miss Cache -> Stream & Save)\n\nconst S3 = new S3Client({\n  region: \"auto\",\n  endpoint: `https://${ACCOUNT_ID}.r2.cloudflarestorage.com`,\n  credentials: {\n    accessKeyId: ACCESS_KEY_ID,\n    secretAccessKey: SECRET_ACCESS_KEY,\n  },\n});\n\n\n\nvar emitter = new events.EventEmitter();\nemitter.setMaxListeners(0);\n\nlet returnQueue = 'http-response-' + paralleldriveCuid2.createId();\n\nconst app = flow.get(\"webApp\");\n\nvar addJob = await global.get(\"getQueue\")(\"query\"); \nawait node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Starting at: \" + new Date()\n    });\n\n// Hàm hỗ trợ đọc metadata từ file\nfunction readLocalMetadata(fileMetadataKey) {\n  if (fs.existsSync(fileMetadataKey)) {\n    const metadata = fs.readFileSync(fileMetadataKey, 'utf8');\n    return JSON.parse(metadata);\n  }\n  return null;\n}\n\n\nconst processFileStream = async function (req, res) {\n    try {\n      const fileKey = req.params.fileKey;\n      const localFilePath = `./cache/${req.hostname}/${fileKey}`;\n      const localMetaPath = `./cache/${req.hostname}/${fileKey}.json`;\n      var localMetadata = readLocalMetadata(localMetaPath);\n\n\n      // --- BƯỚC 1: CACHE MISS - LẤY METADATA TỪ S3 ---\n      if (!fs.existsSync(localFilePath)) {\n        console.log(`[MISS] Kiểm tra S3 cho file: ${fileKey}`);\n\n        let s3Meta;\n        try {\n          const headCommand = new HeadObjectCommand({ Bucket: BUCKET_NAME, Key: fileKey });\n          s3Meta = await S3.send(headCommand);\n        } catch (error) {\n          if (error.name === 'NotFound' || error.name === 'NoSuchKey') {\n            return res.status(404).send('File không tồn tại trên S3.');\n          }\n          console.error('Lỗi S3 HeadObject:', error);\n          return res.status(500).send('Lỗi khi truy vấn S3.');\n        }\n        \n        // Cấu trúc metadata cục bộ\n        localMetadata = {\n          ContentLength: s3Meta.ContentLength,\n          ContentType: s3Meta.ContentType,\n          ETag: s3Meta.ETag,\n          CachedAt: new Date().toISOString()\n        };\n      }\n\n      // --- BƯỚC 2: Tệp lớn (>2MB): REDIRECT để bảo vệ máy chủ ---\n      if (localMetadata.ContentLength > MAX_STREAM_SIZE_BYTES ) {\n        console.log(`[REDIRECT] File ${fileKey} lớn, sử dụng Signed URL.`);\n        const getObjectCommand = new GetObjectCommand({ Bucket: BUCKET_NAME, Key: fileKey });\n        const signedUrl = await getSignedUrl(S3, getObjectCommand, { expiresIn: 3600 });\n        res.redirect(signedUrl);\n        return;\n      }\n\n      // --- BƯỚC 3: Tệp nhỏ (<=2MB): STREAM VÀ LƯU CACHE ---\n      if (localMetadata.ContentLength <= MAX_STREAM_SIZE_BYTES) {\n\n        // 1. Thiết lập header cho Client\n        res.setHeader('Content-Type', localMetadata.ContentType);\n        res.setHeader('Content-Length', localMetadata.ContentLength);\n        \n        if (fs.existsSync(localFilePath)) {\n          // Stream từ local disk\n          fs.createReadStream(localFilePath).pipe(res);\n          return;\n        }\n\n        console.log(`[MISS & SAVE] File ${fileKey} nhỏ, Fetch từ S3, stream và lưu cache.`);\n        let basepath = localFilePath.split(\"/\").slice(0, -1).join(\"/\")\n        if (!fs.existsSync(basepath)) {\n          fs.mkdirSync(basepath, { recursive: true })\n        }\n\n        const getObjectCommand = new GetObjectCommand({ Bucket: BUCKET_NAME, Key: fileKey });\n        const s3Response = await S3.send(getObjectCommand);\n\n        // 2. Stream tới Client và đồng thời Stream tới Local Disk\n        if (s3Response.Body instanceof Readable) {\n          // Tạo luồng băm để tính MD5 và thay đổi nó\n          const hashStream = crypto.createHash('md5');\n          const originalMD5 = s3Response.ETag ? s3Response.ETag.replace(/\"/g, '') : 'N/A';\n          s3Response.Body\n            .on('data', chunk => {\n              // Tính MD5 gốc (Không thay đổi)\n              hashStream.update(chunk);\n            })\n            .on('error', (err) => {\n              console.error(\"Lỗi S3 Stream:\", err);\n              // Đảm bảo đóng writeStream và xóa file tạm nếu lỗi\n              writeStream.close();\n              fs.unlinkSync(localFilePath);\n            });\n\n          const writeStream = fs.createWriteStream(localFilePath);\n          s3Response.Body.pipe(res);\n          s3Response.Body.pipe(writeStream);\n\n          // Chờ quá trình ghi file hoàn tất\n          await new Promise((resolve, reject) => {\n            writeStream.on('finish', () => {\n              // *** Ghi Metadata và Thay đổi MD5 sau khi Ghi file xong ***\n\n              // Ghi Metadata\n              fs.writeFileSync(localMetaPath, JSON.stringify(localMetadata, null, 2));\n\n              // Thao tác MD5 (Tùy chọn: Thêm 1 byte rác để thay đổi MD5 cục bộ)\n              // fs.appendFileSync(localFilePath, Buffer.from([0x01]));\n\n              // const newLocalMD5 = crypto.createHash('md5').update(fs.readFileSync(localFilePath)).digest('hex');\n              // console.log(`MD5 gốc S3: ${originalMD5}, MD5 Local mới: ${newLocalMD5}`);\n\n              resolve();\n            });\n            writeStream.on('error', (err) => {\n              // Đảm bảo xóa file data và meta nếu ghi lỗi\n              fs.unlink(localFilePath, () => { });\n              fs.unlink(localMetaPath, () => { });\n              reject(err);\n            });\n          });\n        } else {\n          res.status(500).send(\"Lỗi: Không thể đọc luồng dữ liệu từ S3.\");\n        }\n      }\n        \n    } catch (err) {\n      console.log(err.message)\n    }\n}\n\nconst processFileToRedirect = async function (req, res) {\n    let requestId = paralleldriveCuid2.createId();\n  try {\n    const fileKey = req.params.fileKey;\n    node.status({fill:\"green\",shape:\"ring\",text:fileKey});\n\n    // 1. Tạo đối tượng lệnh GetObjectCommand\n    const command = new GetObjectCommand({\n      Bucket: BUCKET_NAME,\n      Key: fileKey,\n      // Thêm các Header tùy chỉnh nếu cần (ví dụ: Force download)\n      // ResponseContentDisposition: `attachment; filename=\"${fileKey}\"`, \n    });\n\n    // 2. Tạo Pre-Signed URL\n    // Tệp có thể được truy cập trong 3600 giây (1 giờ)\n    const signedUrl = await getSignedUrl(S3, command, {\n      expiresIn: 3600\n    });\n\n    console.log(`Đã tạo Signed URL cho ${fileKey}: ${signedUrl}`);\n\n    // 3. Chuyển hướng Client (Redirect)\n    // Khi client truy cập endpoint này, server sẽ chuyển hướng\n    // trình duyệt/client đến URL tạm thời trên S3 để tải tệp.\n    res.redirect(signedUrl);\n\n  } catch (error) {\n    console.error('Lỗi khi truy xuất file từ S3:', error);\n\n    // Kiểm tra lỗi NoSuchKey nếu file không tồn tại\n    if (error.name === 'NoSuchKey') {\n      return res.status(404).send('File không tồn tại trên S3.');\n    }\n\n    res.status(500).send('Lỗi máy chủ khi xử lý yêu cầu file.');\n  }\n};\n\napp.get(\"/api/assets/:fileKey\", processFileStream);\n\nglobal.get(\"setWorker\")(returnQueue, async ( returnJob ) => {\n    emitter.emit( returnJob.name, returnJob.data );\n    return null\n}, { concurrency: 100 })\n\nawait node.status({\n    fill: \"green\",\n    shape: \"ring\",\n    text: \"Running at: \" + new Date()\n});\n\nnode.send({ payload: {}})",
+        "name": "Serve File",
+        "func": "const {\n  S3Client,\n  GetObjectCommand,\n  HeadObjectCommand,\n} = awsSdkClientS3;\n\nconst { Upload } = awsSdkLibStorage;\nconst { Readable } = stream;\n\nconst { getSignedUrl } = awsSdkS3RequestPresigner;\n\nconst ACCOUNT_ID = process.env.TL_S3_ACCOUNT_ID;\nconst ACCESS_KEY_ID = process.env.TL_S3_ACCESS_KEY_ID;\nconst SECRET_ACCESS_KEY = process.env.TL_S3_SECRET_ACCESS_KEY;\nconst BUCKET_NAME = process.env.TL_S3_BUCKET_NAME;\n\n// Định nghĩa giới hạn kích thước (byte)\nconst MAX_CACHE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB (Hit Cache)\nconst MAX_STREAM_SIZE_BYTES = 2 * 1024 * 1024; // 2MB (Miss Cache -> Stream & Save)\n\nconst S3 = new S3Client({\n  region: \"auto\",\n  endpoint: ACCOUNT_ID,\n  credentials: {\n    accessKeyId: ACCESS_KEY_ID,\n    secretAccessKey: SECRET_ACCESS_KEY,\n  },\n});\n\nvar emitter = new events.EventEmitter();\nemitter.setMaxListeners(0);\n\nlet returnQueue = 'http-response-' + paralleldriveCuid2.createId();\n\nconst app = flow.get(\"webApp\");\n\nawait node.status({\n        fill: \"red\",\n        shape: \"ring\",\n        text: \"Starting at: \" + new Date()\n    });\n\n// Hàm hỗ trợ đọc metadata từ file\nfunction readLocalMetadata(fileMetadataKey) {\n  if (fs.existsSync(fileMetadataKey)) {\n    const metadata = fs.readFileSync(fileMetadataKey, 'utf8');\n    return JSON.parse(metadata);\n  }\n  return null;\n}\n\nconst processFile = async function (req, res) {\n    try {\n      let fileKey = `${req.hostname}/${req.params.fileKey}`;\n      console.log(`Fetch key: ${fileKey}`)\n      let localFilePath = `./cache/${req.hostname}/${fileKey}`;\n      let localMetaPath = `./cache/${req.hostname}/${fileKey}.json`;\n      var localMetadata = readLocalMetadata(localMetaPath);\n\n      const redirectFile = async () => {\n        console.log(process.env)\n          console.log(`[REDIRECT] File ${fileKey} lớn, sử dụng Signed URL.`);\n          const getObjectCommand = new GetObjectCommand({ Bucket: BUCKET_NAME, Key: fileKey });\n          const signedUrl = await getSignedUrl(S3, getObjectCommand, { expiresIn: 3600 });\n          res.redirect(signedUrl);\n          return;\n      }\n\n      const saveFileFromS3 = async () => {\n        console.log(`[MISS & SAVE] File ${fileKey} nhỏ, Fetch từ S3, stream và lưu cache.`);\n        let basepath = localFilePath.split(\"/\").slice(0, -1).join(\"/\")\n        if (!fs.existsSync(basepath)) {\n          fs.mkdirSync(basepath, { recursive: true })\n        }\n\n        const getObjectCommand = new GetObjectCommand({ Bucket: BUCKET_NAME, Key: fileKey });\n        const s3Response = await S3.send(getObjectCommand);\n\n        // 2. Stream tới Local Disk\n        if (s3Response.Body instanceof Readable) {\n          // Tạo luồng băm để tính MD5 và thay đổi nó\n          const hashStream = crypto.createHash('md5');\n          const originalMD5 = s3Response.ETag ? s3Response.ETag.replace(/\"/g, '') : 'N/A';\n          s3Response.Body\n            .on('data', chunk => {\n              // Tính MD5 gốc (Không thay đổi)\n              hashStream.update(chunk);\n            })\n            .on('error', (err) => {\n              console.error(\"Lỗi S3 Stream:\", err);\n              // Đảm bảo đóng writeStream và xóa file tạm nếu lỗi\n              writeStream.close();\n              fs.unlinkSync(localFilePath);\n            });\n\n          const writeStream = fs.createWriteStream(localFilePath);\n          s3Response.Body.pipe(writeStream);\n\n          // Chờ quá trình ghi file hoàn tất\n          await new Promise((resolve, reject) => {\n            writeStream.on('finish', () => {\n              // *** Ghi Metadata và Thay đổi MD5 sau khi Ghi file xong ***\n\n              // Ghi Metadata\n              fs.writeFileSync(localMetaPath, JSON.stringify(localMetadata, null, 2));\n\n              // Thao tác MD5 (Tùy chọn: Thêm 1 byte rác để thay đổi MD5 cục bộ)\n              // fs.appendFileSync(localFilePath, Buffer.from([0x01]));\n\n              // const newLocalMD5 = crypto.createHash('md5').update(fs.readFileSync(localFilePath)).digest('hex');\n              // console.log(`MD5 gốc S3: ${originalMD5}, MD5 Local mới: ${newLocalMD5}`);\n\n              resolve();\n            });\n            writeStream.on('error', (err) => {\n              // Đảm bảo xóa file data và meta nếu ghi lỗi\n              fs.unlink(localFilePath, () => { });\n              fs.unlink(localMetaPath, () => { });\n              reject(err);\n            });\n          });\n        } else {\n          res.status(500).send(\"Lỗi: Không thể đọc luồng dữ liệu từ S3.\");\n        }\n      }\n\n      const redirectFromS3Hostname = async () => {\n        \n      }\n        \n      const streamFile = async () => {\n        try  {\n          if (fs.existsSync(localFilePath) || fs.existsSync(localMetaPath)) {\n              const metadata = JSON.parse(fs.readFileSync(localMetaPath, 'utf8'));\n              // 1. Thiết lập header cho Client\n              res.setHeader('Content-Type', metadata.ContentType);\n              res.setHeader('Content-Length', metadata.ContentLength);\n              // Stream từ local disk\n              fs.createReadStream(localFilePath).pipe(res);\n              return;\n          }\n        } catch (err) {\n          res.status(500).send(\"Error: Cannot stream file from local.\");\n        }\n\n        console.log(`[MISS & SAVE] File ${fileKey} nhỏ, Fetch từ S3, stream và lưu cache.`);\n        let basepath = localFilePath.split(\"/\").slice(0, -1).join(\"/\")\n        if (!fs.existsSync(basepath)) {\n          fs.mkdirSync(basepath, { recursive: true })\n        }\n\n        const getObjectCommand = new GetObjectCommand({ Bucket: BUCKET_NAME, Key: fileKey });\n        const s3Response = await S3.send(getObjectCommand);\n\n        // 2. Stream tới Client và đồng thời Stream tới Local Disk\n        if (s3Response.Body instanceof Readable) {\n          // Tạo luồng băm để tính MD5 và thay đổi nó\n          const hashStream = crypto.createHash('md5');\n          const originalMD5 = s3Response.ETag ? s3Response.ETag.replace(/\"/g, '') : 'N/A';\n          s3Response.Body\n            .on('data', chunk => {\n              // Tính MD5 gốc (Không thay đổi)\n              hashStream.update(chunk);\n            })\n            .on('error', (err) => {\n              console.error(\"Lỗi S3 Stream:\", err);\n              // Đảm bảo đóng writeStream và xóa file tạm nếu lỗi\n              writeStream.close();\n              fs.unlinkSync(localFilePath);\n            });\n\n          const writeStream = fs.createWriteStream(localFilePath);\n          s3Response.Body.pipe(res);\n          s3Response.Body.pipe(writeStream);\n\n          // Chờ quá trình ghi file hoàn tất\n          await new Promise((resolve, reject) => {\n            writeStream.on('finish', () => {\n              // *** Ghi Metadata và Thay đổi MD5 sau khi Ghi file xong ***\n\n              // Ghi Metadata\n              fs.writeFileSync(localMetaPath, JSON.stringify(localMetadata, null, 2));\n\n              // Thao tác MD5 (Tùy chọn: Thêm 1 byte rác để thay đổi MD5 cục bộ)\n              // fs.appendFileSync(localFilePath, Buffer.from([0x01]));\n\n              // const newLocalMD5 = crypto.createHash('md5').update(fs.readFileSync(localFilePath)).digest('hex');\n              // console.log(`MD5 gốc S3: ${originalMD5}, MD5 Local mới: ${newLocalMD5}`);\n\n              resolve();\n            });\n            writeStream.on('error', (err) => {\n              // Đảm bảo xóa file data và meta nếu ghi lỗi\n              fs.unlink(localFilePath, () => { });\n              fs.unlink(localMetaPath, () => { });\n              reject(err);\n            });\n          });\n        } else {\n          res.status(500).send(\"Lỗi: Không thể đọc luồng dữ liệu từ S3.\");\n        }\n      }\n\n      const getMetadata = async () => {\n        console.log(`[MISS] Kiểm tra S3 cho file: ${fileKey}`);\n        let s3Meta;\n        const headCommand = new HeadObjectCommand({ Bucket: BUCKET_NAME, Key: fileKey });\n        s3Meta = await S3.send(headCommand);\n        // Cấu trúc metadata cục bộ\n        localMetadata = {\n          ContentLength: s3Meta.ContentLength,\n          ContentType: s3Meta.ContentType,\n          ETag: s3Meta.ETag,\n          CachedAt: new Date().toISOString()\n        };\n      };\n\n      const fetchFileFromBucket = async () => {\n        let { errors, data } = await context.get(\"fetchFromField\")(req, res);\n        if (!errors && data?.file?.data) {\n          console.log('Fetch file and upload to S3')\n          let bufferFile = Buffer.from(data?.file?.data.replace(/^data:\\w+\\/\\w+;base64,/, \"\"), 'base64');\n          // Khởi tạo Upload với S3Client và các tham số\n          const parallelUploads = new Upload({\n            client: S3,\n            params: {\n              Bucket: BUCKET_NAME,\n              Key: fileKey,\n              Body: bufferFile,\n              // ContentType lấy tự động từ Multer (VD: application/pdf, video/mp4)\n              ContentType: data?.file?.type,\n              ACL: 'public-read'\n            },\n            // Cấu hình cho Multipart Upload \n            queueSize: 4,\n            partSize: 5 * 1024 * 1024,\n          });\n\n          // Chờ quá trình upload hoàn tất\n          const dataUpload = await parallelUploads.done();\n          if (dataUpload?.Key) {\n            await main()\n          }\n          console.log(dataUpload)\n        } else {\n          return res.status(404).send('File không tồn tại trên Bucket.');  \n        }\n      }\n\n      // --- BƯỚC 1: CACHE MISS - LẤY METADATA TỪ S3 ---\n      const main = async () => {\n        if (!fs.existsSync(localFilePath)) {\n          try {\n            await getMetadata()\n            if (localMetadata.ContentLength > MAX_STREAM_SIZE_BYTES ) {\n              // --- BƯỚC 2: Tệp lớn (>2MB): REDIRECT để bảo vệ máy chủ ---\n              await redirectFile();\n            } else {\n              // --- BƯỚC 3: Tệp nhỏ (<=2MB): STREAM VÀ LƯU CACHE ---\n              await streamFile()\n            }\n          } catch (error) {\n            if (error.name === 'NotFound' || error.name === 'NoSuchKey') {\n              return await fetchFileFromBucket()\n            }\n            console.error('Lỗi S3 HeadObject:', error);\n            return res.status(500).send('Lỗi khi truy vấn S3.');\n          }\n        } else {\n          await streamFile();\n        }\n      }\n      await main()\n    } catch (err) {\n      console.log(err.message)\n      return res.status(500).send(err.message);\n    }\n}\n\nconst processFileStream = async function (req, res) {\n  try {\n    let fileKey = `${req.hostname}/${req.params.fileKey}`;\n    console.log(`Fetch key: ${fileKey}`)\n    let localFilePath = `./cache/${req.hostname}/${fileKey}`;\n    let localMetaPath = `./cache/${req.hostname}/${fileKey}.json`;\n    var localMetadata = readLocalMetadata(localMetaPath);\n\n    const getMetadata = async (hostname = null) => {\n      console.log(`[MISS] Kiểm tra S3 cho file: ${fileKey}`);\n      try {\n        const headCommand = new HeadObjectCommand({ Bucket: BUCKET_NAME, Key: fileKey });\n        let s3Meta = await S3.send(headCommand);\n        console.log(s3Meta)\n        // Cấu trúc metadata cục bộ\n        localMetadata = {\n          ContentLength: s3Meta.ContentLength,\n          ContentType: s3Meta.ContentType,\n          ETag: s3Meta.ETag,\n          CachedAt: new Date().toISOString()\n        };\n      } catch (err) {\n        res.status(500).send(\"File not exist in: \" + req.hostname);\n      }\n    }\n\n    const redirectFile = async (hostname=null) => {\n      await getMetadata()\n      // console.log(`[REDIRECT] sử dụng Signed URL.`);\n      // const getObjectCommand = new GetObjectCommand({ Bucket: BUCKET_NAME, Key: `${hostname || req.hostname}/${req.params.fileKey}` });\n      // console.log(getObjectCommand)\n      // const signedUrl = await getSignedUrl(S3, getObjectCommand, { expiresIn: 3600 });\n      // console.log(signedUrl)\n      // res.redirect(signedUrl);\n      return;\n    }\n\n    const redirectFromS3Hostname = async () => {\n\n    }\n\n    const streamFile = async () => {\n      try {\n        if (fs.existsSync(localFilePath) && fs.existsSync(localMetaPath)) {\n          const metadata = JSON.parse(fs.readFileSync(localMetaPath, 'utf8'));\n          // 1. Thiết lập header cho Client\n          res.setHeader('Content-Type', metadata.ContentType);\n          res.setHeader('Content-Length', metadata.ContentLength);\n          // Stream từ local disk\n          fs.createReadStream(localFilePath).pipe(res);\n          return;\n        } else {\n          await redirectFile()\n        }\n      } catch (err) {\n        res.status(500).send(\"Error: Cannot stream file from local.\");\n      }\n    }\n\n\n    // --- BƯỚC 1: CACHE MISS - LẤY METADATA TỪ S3 ---\n    const main = async () => {\n      streamFile()\n    }\n    await main()\n  } catch (err) {\n    console.log(err.message)\n    return res.status(500).send(err.message);\n  }\n}\n\napp.get(\"/api/assets/:fileKey\", processFileStream);\n\nawait node.status({\n    fill: \"green\",\n    shape: \"ring\",\n    text: \"Running at: \" + new Date()\n});\n\nnode.send({ payload: {}})",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
-        "initialize": "const init = async () => {\n    if (!fs.existsSync('./cache')) {\n        fs.mkdirSync('./cache');\n    }\n};\n\ninit()",
+        "initialize": "const init = async () => {\n    if (!fs.existsSync('./cache')) {\n        fs.mkdirSync('./cache');\n    }\n};\n\nvar socContainer;\n\nconst fetchFromField = async (req, res) => {\n    try {\n        const fileKey = req.params.fileKey;\n        socContainer = socContainer || await global.get(\"createSoc\");\n        return await new Promise( (resolve, reject) => {\n            socContainer(\"bucket\", soc => {\n                soc.query(`query Get_ltxwzfndejsmc0cg772e50ul($getLtxwzfndejsmc0Cg772E50UlId: ID!) {\n                    file:get_ltxwzfndejsmc0cg772e50ul(id: $getLtxwzfndejsmc0Cg772E50UlId) {\n                        id\n                        type:hiul67tn6y90oi6xqmsrotv6\n                        lihziugnpu2h85xyrim55vwi\n                        format:fdc2shwlo4r4vzze2eee7sqh\n                        name:llvlflytf6zingnhppy8n5j4\n                        data:gbclehqtfjjzaar9shrgi913\n                    }\n                    }`, {\n                    \"getLtxwzfndejsmc0Cg772E50UlId\": req.params.fileKey.split(\"_\")[0]\n                }, ({ errors, data }) => {\n                    resolve({ errors, data})\n                })\n            })\n        })\n    } catch (err) {\n        return { errors: [{ message: err.message}]}\n    }\n}\n\ncontext.set(\"fetchFromField\", fetchFromField)\ninit()",
         "finalize": "",
         "libs": [
             {
@@ -630,9 +744,17 @@
             {
                 "var": "stream",
                 "module": "stream"
+            },
+            {
+                "var": "awsSdkLibStorage",
+                "module": "@aws-sdk/lib-storage"
+            },
+            {
+                "var": "process",
+                "module": "process"
             }
         ],
-        "x": 630,
+        "x": 620,
         "y": 1340,
         "wires": [
             [
@@ -975,6 +1097,162 @@
         "wires": [
             [
                 "88271cb98fbef6b7"
+            ]
+        ]
+    },
+    {
+        "id": "f44b656ee8180672",
+        "type": "inject",
+        "z": "f36228d8945cf488",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 180,
+        "y": 360,
+        "wires": [
+            [
+                "e96d679c2e27b12e"
+            ]
+        ]
+    },
+    {
+        "id": "e34995bb93cff256",
+        "type": "subflow:8018d9f1020dc2a3",
+        "z": "f36228d8945cf488",
+        "name": "",
+        "x": 500,
+        "y": 360,
+        "wires": [
+            [
+                "b326e9192f10df4a"
+            ]
+        ]
+    },
+    {
+        "id": "3c62798a81baa656",
+        "type": "subflow:8018d9f1020dc2a3",
+        "z": "f36228d8945cf488",
+        "name": "",
+        "x": 360,
+        "y": 540,
+        "wires": [
+            [
+                "22b64a34c67d3525"
+            ]
+        ]
+    },
+    {
+        "id": "5f5f4da17e9d60f0",
+        "type": "subflow:8018d9f1020dc2a3",
+        "z": "f36228d8945cf488",
+        "name": "",
+        "x": 620,
+        "y": 660,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "b326e9192f10df4a",
+        "type": "delay",
+        "z": "f36228d8945cf488",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 460,
+        "y": 440,
+        "wires": [
+            [
+                "40ebfb46f55ff405"
+            ]
+        ]
+    },
+    {
+        "id": "22b64a34c67d3525",
+        "type": "delay",
+        "z": "f36228d8945cf488",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 400,
+        "y": 600,
+        "wires": [
+            [
+                "5f5f4da17e9d60f0"
+            ]
+        ]
+    },
+    {
+        "id": "e96d679c2e27b12e",
+        "type": "function",
+        "z": "f36228d8945cf488",
+        "name": "function 3",
+        "func": "flow.set(\"init\", \"tesst\")\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 320,
+        "y": 360,
+        "wires": [
+            [
+                "e34995bb93cff256"
+            ]
+        ]
+    },
+    {
+        "id": "40ebfb46f55ff405",
+        "type": "function",
+        "z": "f36228d8945cf488",
+        "name": "function 4",
+        "func": "console.log(flow.get(\"tt\"))\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 480,
+        "wires": [
+            [
+                "3c62798a81baa656"
             ]
         ]
     }

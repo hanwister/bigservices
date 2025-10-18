@@ -159,5 +159,12 @@
         "subpath": "",
         "builtin": false,
         "known": false
+    },
+    "ejs": {
+        "spec": "ejs",
+        "module": "ejs",
+        "subpath": "",
+        "builtin": false,
+        "known": false
     }
 }

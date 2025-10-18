@@ -19,12 +19,13 @@
             "dialog": {
                 "export": {
                     "pretty": true,
-                    "json-view": false
+                    "json-view": true
                 }
             }
         },
         "menu-deploymenu-item-node": false,
         "menu-deploymenu-item-full": true,
-        "menu-menu-item-sidebar": false
+        "menu-menu-item-sidebar": true,
+        "menu-deploymenu-item-flow": false
     }
 }

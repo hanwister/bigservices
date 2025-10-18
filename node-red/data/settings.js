@@ -47,7 +47,7 @@ module.exports = {
      * it easier to compare changes when using version control.
      * To disable pretty-printing of the JSON set the following property to false.
      */
-    flowFilePretty: true,
+    // flowFilePretty: true,
 
     /** By default, all user data is stored in a directory called `.node-red` under
      * the user's home directory. To use a different location, the following

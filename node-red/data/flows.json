@@ -35,7 +35,7 @@
         "id": "772c07f1f620c995",
         "type": "tab",
         "label": "Bull Queue Dashboard",
-        "disabled": true,
+        "disabled": false,
         "info": "",
         "env": []
     },
@@ -51,7 +51,7 @@
         "id": "18caed853880999b",
         "type": "tab",
         "label": "Binance",
-        "disabled": false,
+        "disabled": true,
         "info": "",
         "env": []
     },
@@ -59,6 +59,14 @@
         "id": "af13c7f5e79b8c40",
         "type": "tab",
         "label": "Binance Futures P&L",
+        "disabled": true,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "cdfd4aa9099e0473",
+        "type": "tab",
+        "label": "Flow 1",
         "disabled": false,
         "info": "",
         "env": []
@@ -311,6 +319,95 @@
             }
         ],
         "modules": {}
+    },
+    {
+        "id": "c69803de08016f9a",
+        "type": "ui-base",
+        "name": "My Dashboard",
+        "path": "/dashboard",
+        "appIcon": "",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": false,
+        "headerContent": "page",
+        "navigationStyle": "default",
+        "titleBarStyle": "default",
+        "showReconnectNotification": true,
+        "notificationDisplayTime": 1,
+        "showDisconnectNotification": true,
+        "allowInstall": false
+    },
+    {
+        "id": "35b8dce006027490",
+        "type": "ui-theme",
+        "name": "Default Theme",
+        "colors": {
+            "surface": "#ffffff",
+            "primary": "#0094CE",
+            "bgPage": "#eeeeee",
+            "groupBg": "#ffffff",
+            "groupOutline": "#cccccc"
+        },
+        "sizes": {
+            "density": "default",
+            "pagePadding": "12px",
+            "groupGap": "12px",
+            "groupBorderRadius": "4px",
+            "widgetGap": "12px"
+        }
+    },
+    {
+        "id": "e2e42deb7bde4825",
+        "type": "ui-page",
+        "name": "Dashboard",
+        "ui": "c69803de08016f9a",
+        "path": "/page1",
+        "icon": "home",
+        "layout": "grid",
+        "theme": "35b8dce006027490",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": 1,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "c94d49ed7a1ed8f5",
+        "type": "ui-group",
+        "name": "Set env",
+        "page": "e2e42deb7bde4825",
+        "width": 6,
+        "height": 1,
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
     },
     {
         "id": "8e1fa8b70b7d4a07",
@@ -1635,7 +1732,7 @@
         "type": "function",
         "z": "c23a997595de5280",
         "name": "Build Apolo",
-        "func": "const { createId } = paralleldriveCuid2;\nif (msg.topic == \"request\") {\n    try {\n        let { schema, payload, context: contextValue } = msg.request;\n        node.status({\n            fill: \"blue\",\n            text: \"Processing: \" + contextValue.id\n        })\n        let requestParse = await context.get(\"getGraphQlServer\")({ schema, payload, options: { contextValue }});\n        if ( [\"error\", \"data\"].includes(requestParse.topic)) {\n            global.get(\"sendJobToQueue\")(contextValue.replyTo, contextValue.id, requestParse.payload, { jobId: contextValue.id });\n            node.status({\n            fill: \"blue\",\n            text: \"Res: \" + contextValue.id\n        })\n        } else if (requestParse.topic == \"parse\") {\n            node.send(requestParse)\n        }\n    } catch (err) {\n        console.log(msg.request)\n        node.status({\n            fill: \"red\",\n            text: \"Processed error: \" + err.message\n        })\n    }\n} else if ( msg.topic == \"configTables\") {\n    msg.payload.forEach( async ([schema, tables]) => {\n        console.log(schema)\n        await context.get(\"createGraphqlServer\")(schema, tables);\n    });\n    node.send(msg);\n}\n\nreturn null;",
+        "func": "const { createId } = paralleldriveCuid2;\nif (msg.topic == \"request\") {\n    try {\n        let { schema, payload, context: contextValue } = msg.request;\n        node.status({\n            fill: \"blue\",\n            text: \"Processing: \" + contextValue.id\n        })\n        let requestParse = await context.get(\"getGraphQlServer\")({ schema, payload, options: { contextValue }});\n        if ( [\"error\", \"data\"].includes(requestParse.topic)) {\n            global.get(\"sendJobToQueue\")(contextValue.replyTo, contextValue.id, requestParse.payload, { jobId: contextValue.id });\n        //     node.status({\n        //     fill: \"blue\",\n        //     text: \"Res: \" + contextValue.id\n        // })\n        } else if (requestParse.topic == \"parse\") {\n            node.send(requestParse)\n        }\n    } catch (err) {\n        console.log(msg.request)\n        node.status({\n            fill: \"red\",\n            text: \"Processed error: \" + err.message\n        })\n    }\n} else if ( msg.topic == \"configTables\") {\n    msg.payload.forEach( async ([schema, tables]) => {\n        console.log(schema)\n        await context.get(\"createGraphqlServer\")(schema, tables);\n    });\n    node.send(msg);\n}\n\nreturn null;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -1668,11 +1765,11 @@
         "type": "function",
         "z": "c23a997595de5280",
         "name": "Query Worker",
-        "func": "node.status({fill:\"blue\",shape:\"ring\",text:\"Starting\"});\nglobal.get(\"setWorker\")(\"query\", (job) => {\n    node.send({\n        topic: \"request\",\n        request: job.data\n    })\n    node.status({fill:\"green\",shape:\"ring\",text:job.id});\n    return null\n}, { concurrency: 100 })\nreturn null;",
+        "func": "context.get('init')()",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
-        "initialize": "",
+        "initialize": "const send = (job) => {\n    node.send({\n        topic: \"request\",\n        request: job.data\n    })\n}\nconst init = async () => {\n    node.status({ fill: \"blue\", shape: \"ring\", text: \"Starting\" });\n    global.get(\"setWorker\")(\"query\", (job) => {\n        let mes = `Process job: ${job.id}`\n        node.status({ fill: \"green\", shape: \"ring\", text: mes });\n        console.log(mes)\n        send(job)\n    }, { concurrency: 100 })\n}\n\ncontext.set(\"init\", init);",
         "finalize": "",
         "libs": [],
         "x": 320,
@@ -1721,7 +1818,7 @@
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
-        "initialize": "var wsApp;\nvar wsAppConnected = false;\nvar emitter = new events.EventEmitter();\nemitter.setMaxListeners(0);\n\nlet workerId = paralleldriveCuid2.createId();\n// await global.get(\"getQueue\")(\"worker\"); \n\nlet connectSocket = async () => {\n    let hasuraURL = new url.URL(env.get(\"HASURA_URL\"));\n    // Convert Ws Query\n    hasuraURL.protocol = \"ws:\";\n    hasuraURL.pathname = \"/v1/graphql\";\n    console.log(`Connecting Hasura: ${hasuraURL.href}`);\n    wsApp = new WebSocket(hasuraURL.href, [\"graphql-ws\"]);\n    wsApp.on(\"open\", async () => {\n        console.log(`Connect Hasura successfully: ${hasuraURL.href}`);\n        await wsApp.send(JSON.stringify({ type: \"connection_init\", \n        payload: { \n            headers: { \n                \"content-type\": \"application/json\",\n                \"x-hasura-admin-secret\": \"anh08091998t@HASURA\"\n                }, lazy: true } }));\n    });\n\n    wsApp.on(\"message\", async (msg) => {\n        const { id, type, payload } = JSON.parse(msg.toString());\n        console.log(\"message\", id, type, payload?.errors, payload?.data);\n        node.status({fill:\"red\",shape:\"ring\",text: JSON.stringify(payload)});\n        if (id) {\n            let has_listener = await emitter.emit(id, {\n                type,\n                payload\n            });\n            if (!has_listener) {\n                emitter.emit(`stop-${id}`, null)\n            }\n        } else if (type === \"connection_ack\") {\n            wsAppConnected = true;\n            emitter.emit(\"connect\", true);\n        }\n    });\n\n\n    wsApp.on(\"error\", (err) => {\n        console.log(\"Connect Hasura failed!\");\n    });\n\n    wsApp.on(\"close\", () => {\n        console.log(\"Connect Hasura Socket closed!\");\n        console.log(`Try reconnect to Hasura after: 1000ms`);\n        if (this.state !== \"close\") {\n            setTimeout(connectSocket, 1000)\n        }\n    });\n};\n\nconnectSocket();\n\ncontext.set(\"sendQuery\", async ({ payload, type, mode, action, contextValue, objectQuery, resolveNow}) => {\n    try {\n        await wsApp.send(JSON.stringify({ id: contextValue.id, payload, type }));\n        emitter.on(contextValue.id, async (returnValue) => {\n            if ([\"get\"].includes(action) && returnValue.payload?.data) {\n                returnValue.payload.data[objectQuery.target[0]] = returnValue.payload.data[objectQuery.target[0]][0]\n            };\n            if (resolveNow) {\n                resolveNow(returnValue)\n            } else {\n                if (contextValue.replyTo) {\n                    node.send({\n                        topic: \"reply\",\n                        returnValue,\n                        replyTo: contextValue.replyTo,\n                        id: contextValue.id\n                    });\n                }\n            }\n            if ( ['error', 'complete'].includes(returnValue.type)) {\n                emitter.removeAllListeners(contextValue.id)\n            }\n        })\n    } catch (err) {\n        console.log(err)\n    }\n})",
+        "initialize": "var wsApp;\nvar wsAppConnected = false;\nvar emitter = new events.EventEmitter();\nemitter.setMaxListeners(0);\n\nlet workerId = paralleldriveCuid2.createId();\n// await global.get(\"getQueue\")(\"worker\"); \n\nlet connectSocket = async () => {\n    let hasuraURL = new url.URL(env.get(\"HASURA_URL\"));\n    // Convert Ws Query\n    hasuraURL.protocol = \"ws:\";\n    hasuraURL.pathname = \"/v1/graphql\";\n    console.log(`Connecting Hasura: ${hasuraURL.href}`);\n    wsApp = new WebSocket(hasuraURL.href, [\"graphql-ws\"]);\n    wsApp.on(\"open\", async () => {\n        console.log(`Connect Hasura successfully: ${hasuraURL.href}`);\n        await wsApp.send(JSON.stringify({ type: \"connection_init\", \n        payload: { \n            headers: { \n                \"content-type\": \"application/json\",\n                \"x-hasura-admin-secret\": \"anh08091998t@HASURA\"\n                }, lazy: true } }));\n    });\n\n    wsApp.on(\"message\", async (msg) => {\n        const { id, type, payload } = JSON.parse(msg.toString());\n        console.log(\"message\", id, type, payload?.errors, payload?.data);\n        node.status({fill:\"red\",shape:\"ring\",text: JSON.stringify(payload)});\n        if (id) {\n            let has_listener = await emitter.emit(id, {\n                type,\n                payload\n            });\n            if (!has_listener) {\n                emitter.emit(`stop-${id}`, null)\n            }\n        } else if (type === \"connection_ack\") {\n            wsAppConnected = true;\n            emitter.emit(\"connect\", true);\n        }\n    });\n\n\n    wsApp.on(\"error\", (err) => {\n        console.log(\"Connect Hasura failed!\");\n    });\n\n    wsApp.on(\"close\", () => {\n        console.log(\"Connect Hasura Socket closed!\");\n        console.log(`Try reconnect to Hasura after: 1000ms`);\n        if (this.state !== \"close\") {\n            setTimeout(connectSocket, 1000)\n        }\n    });\n};\n\nconnectSocket();\n\ncontext.set(\"sendQuery\", async ({ payload, type, mode, action, contextValue, objectQuery, resolveNow}) => {\n    try {\n        await wsApp.send(JSON.stringify({ id: contextValue.id, payload, type }));\n        emitter.on(contextValue.id, async (returnValue) => {\n            if ([\"get\"].includes(action) && returnValue.payload?.data) {\n                returnValue.payload.data[objectQuery.target[0]] = returnValue.payload.data[objectQuery.target[0]][0]\n            };\n            if (resolveNow) {\n                resolveNow(returnValue)\n            } else {\n                if (contextValue.replyTo) {\n                    node.send({\n                        topic: \"reply\",\n                        returnValue,\n                        replyTo: contextValue.replyTo,\n                        id: contextValue.id\n                    });\n                };\n            }\n            if ( ['error', 'complete'].includes(returnValue.type)) {\n                emitter.removeAllListeners(contextValue.id)\n            }\n        })\n    } catch (err) {\n        console.log(err)\n    }\n})",
         "finalize": "",
         "libs": [
             {
@@ -1754,7 +1851,7 @@
         "type": "function",
         "z": "c23a997595de5280",
         "name": "send Response To ReplyTo Queue",
-        "func": "// flow.get(\"sendJobToQueue\")( msg.replyTo, msg.id, msg.returnValue, { jobId: msg.id})\nglobal.get(\"sendJobToQueue\")( msg.replyTo, msg.id, msg.returnValue)\n\nreturn msg;",
+        "func": "// flow.get(\"sendJobToQueue\")( msg.replyTo, msg.id, msg.returnValue, { jobId: msg.id})\nglobal.get(\"sendJobToQueue\")(msg.replyTo, msg.id, msg.returnValue, { jobId: msg.id });\nlet status = `job:${msg.id} => worker:${msg.replyTo} `\nnode.status({fill:\"red\",shape:\"ring\",text:status});\nconsole.log(status)\n\nreturn msg;",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,
@@ -2290,6 +2387,83 @@
         ]
     },
     {
+        "id": "55ba7f6515ca821c",
+        "type": "inject",
+        "z": "c23a997595de5280",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 620,
+        "y": 380,
+        "wires": [
+            [
+                "0ece2d2684448c3d"
+            ]
+        ]
+    },
+    {
+        "id": "0ece2d2684448c3d",
+        "type": "function",
+        "z": "c23a997595de5280",
+        "name": "function 5",
+        "func": "process.env[\"GRAPHQL_URL\"] = \"tessst\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "process",
+                "module": "process"
+            }
+        ],
+        "x": 860,
+        "y": 380,
+        "wires": [
+            [
+                "0eb526b839012358"
+            ]
+        ]
+    },
+    {
+        "id": "0eb526b839012358",
+        "type": "function",
+        "z": "c23a997595de5280",
+        "name": "function 6",
+        "func": "console.log(process.env['GRAPHQL_URL'])\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "process",
+                "module": "process"
+            }
+        ],
+        "x": 860,
+        "y": 560,
+        "wires": [
+            []
+        ]
+    },
+    {
         "id": "0cd032db82ea035a",
         "type": "inject",
         "z": "18caed853880999b",
@@ -2509,5 +2683,187 @@
         "x": 930,
         "y": 140,
         "wires": []
+    },
+    {
+        "id": "1e55962d365b430a",
+        "type": "inject",
+        "z": "cdfd4aa9099e0473",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 140,
+        "wires": [
+            [
+                "a7c8dada87c5e87c"
+            ]
+        ]
+    },
+    {
+        "id": "c83add8e12cebe71",
+        "type": "debug",
+        "z": "cdfd4aa9099e0473",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 780,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "e87c24ce8b7aaad2",
+        "type": "ui-button",
+        "z": "cdfd4aa9099e0473",
+        "group": "c94d49ed7a1ed8f5",
+        "name": "",
+        "label": "button",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "emulateClick": false,
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "iconPosition": "left",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "buttonColor": "",
+        "textColor": "",
+        "iconColor": "",
+        "enableClick": true,
+        "enablePointerdown": false,
+        "pointerdownPayload": "",
+        "pointerdownPayloadType": "str",
+        "enablePointerup": false,
+        "pointerupPayload": "",
+        "pointerupPayloadType": "str",
+        "x": 430,
+        "y": 260,
+        "wires": [
+            [
+                "0c0758552b74ea35"
+            ]
+        ]
+    },
+    {
+        "id": "0c0758552b74ea35",
+        "type": "function",
+        "z": "cdfd4aa9099e0473",
+        "name": "function 7",
+        "func": "msg.payload = \"tesst\"\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 620,
+        "y": 200,
+        "wires": [
+            [
+                "b210a09fc5234031",
+                "c83add8e12cebe71"
+            ]
+        ]
+    },
+    {
+        "id": "b210a09fc5234031",
+        "type": "ui-text",
+        "z": "cdfd4aa9099e0473",
+        "group": "c94d49ed7a1ed8f5",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "text",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#717171",
+        "wrapText": false,
+        "className": "",
+        "value": "payload",
+        "valueType": "msg",
+        "x": 810,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "a7c8dada87c5e87c",
+        "type": "function",
+        "z": "cdfd4aa9099e0473",
+        "name": "Get env",
+        "func": "const AsyncFunction = (async function () { }).constructor;\n\n// let environment = await ejs.compile(\"<%- JSON.stringify(process.env) -%>\", { client: true, async: true, cache: false,  rmWhitespace: false })({  }, null, async (target, d) => {\n//     console.log(JSON.stringify(target))\n//     console.log(JSON.stringify(d))\n//     return target\n\n// });\n\n// console.log(JSON.parse(environment))\n\nmsg.payload = Object.entries(process.env)\n.filter( ([key, value]) => {\n    return key.startsWith(\"TL\")\n})\n.map( ([key, value]) => {\n    return `${key}: ${value}`\n});\nmsg.payload = [ `${'NODE_ENV'}: ${process.env.NODE_ENV}` , ...msg.payload]\nconsole.log(msg)\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [
+            {
+                "var": "process",
+                "module": "process"
+            },
+            {
+                "var": "ejs",
+                "module": "ejs"
+            }
+        ],
+        "x": 120,
+        "y": 400,
+        "wires": [
+            [
+                "d259e46711f7fdd8"
+            ]
+        ]
+    },
+    {
+        "id": "d259e46711f7fdd8",
+        "type": "ui-template",
+        "z": "cdfd4aa9099e0473",
+        "group": "c94d49ed7a1ed8f5",
+        "page": "",
+        "ui": "",
+        "name": "",
+        "order": 1,
+        "width": "6",
+        "height": "8",
+        "head": "",
+        "format": "<template>\n    <div :style=\"green\">\n        <ul style=\"list-style-type: none; padding: 0;\">\n            <div v-for=\"item in msg.payload\">\n                <div>{{ item }}</div>\n            </div>\n        </ul>\n    </div>\n</template>\n\n<script>\n    export default {\n        data() {\n            // define variables available component-wide\n            // (in <template> and component functions)\n            return {\n                html: ''\n            }\n        },\n        watch: {\n            msg: function() {\n                this.html = this.msg.payload\n            },\n            // watch for any changes of \"count\"\n            count: function () {\n                if (this.count % 5 === 0) {\n                    this.send({payload: 'Multiple of 5'})\n                }\n            }\n        },\n        computed: {\n            // automatically compute this variable\n            // whenever VueJS deems appropriate\n            formattedCount: function () {\n                return this.count + ' Apples'\n            }\n        },\n        methods: {\n            // expose a method to our <template> and Vue Application\n            increase: function () {\n                this.count++\n            }\n        },\n        mounted() {\n            this.html = this.msg.payload\n            // code here when the component is first loaded\n        },\n        unmounted() {\n            // code here when the component is removed from the Dashboard\n            // i.e. when the user navigates away from the page\n        }\n    }\n</script>\n<style>\n    /* define any styles here - supports raw CSS */\n    .my-class {\n        color: red;\n    }\n</style>",
+        "storeOutMessages": true,
+        "passthru": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 280,
+        "y": 280,
+        "wires": [
+            []
+        ]
     }
 ]
